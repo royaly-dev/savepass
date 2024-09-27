@@ -3,6 +3,7 @@ const { app, BrowserWindow } = require('electron/main')
 const path = require("node:path")
 const { addPassword, deletePassword, getPassword, passwordManager } = require('./src/script/encrypte')
 const fs = require("node:fs")
+const { autoUpdater } = require("electron-updater")
 
 let win
 
@@ -67,11 +68,32 @@ app.whenReady().then(() => {
   // Update System
 
   ipcMain.handle('get-update', () => {
-    return JSON.stringify({test: true});
+    autoUpdater.checkForUpdates()
+    return new Promise((resolve, reject) => {
+
+      // resolve if an update is available
+      autoUpdater.on("update-available", () => {
+        resolve(JSON.stringify({available: true}));
+      })
+
+      // reject if no update is available
+      autoUpdater.on("update-not-available", () => {
+        reject(JSON.stringify({available: false}));
+      })
+    });
+  })
+
+  ipcMain.handle('download-update', () => {
+    autoUpdater.downloadUpdate()
+
+    autoUpdater.on("download-progress", (progressObj) => {
+      let d = String(progressObj.percent).split('.')
+      winupdate.webContents.send("updateapp", d[0])
+    })
   })
 
   ipcMain.handle('start-update', () => {
-    return JSON.stringify({test: true});
+    autoUpdater.quitAndInstall()
   })
 
   ipcMain.handle('update-finish', () => {
@@ -84,8 +106,11 @@ app.whenReady().then(() => {
     fs.writeFile(appdata + "\\TodoAppFile\\data.json", JSON.stringify(passwordManager), { flag: 'a+' }, (e) => {
       if (e) {
           console.log(e)
+          return {err: true}
       }
     })
+
+    return {err: false}
   })
 
   ipcMain.on('get-info', (event, data) => {
@@ -136,3 +161,6 @@ function getall() {
 
   return data
 }
+
+autoUpdater.autoDownload = false
+autoUpdater.updateConfigPath = path.join(app.getAppPath(), 'dev-app-update.yml');
