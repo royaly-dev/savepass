@@ -13,6 +13,7 @@
     "electron": "^32.1.2"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "electron-builder": "^25.0.5"
   }
 }

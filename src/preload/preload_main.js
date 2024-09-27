@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('db', {
-  get: () => ipcRenderer.invoke('get-info'),
-  add: () => ipcRenderer.invoke('add-new'),
-  delete: () => ipcRenderer.invoke('delete-info')
+  all: (data) => ipcRenderer.send('get-info', data),
+  get: (data) => ipcRenderer.send('get-pass', data),
+  add: (data) => ipcRenderer.send('add-new', data),
+  delete: (data) => ipcRenderer.send('delete-info', data)
 })

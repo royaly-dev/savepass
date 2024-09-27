@@ -1,7 +1,8 @@
 const { ipcMain } = require('electron')
 const { app, BrowserWindow } = require('electron/main')
-
 const path = require("node:path")
+const { addPassword, deletePassword, getPassword, passwordManager } = require('./src/script/encrypte')
+const fs = require("node:fs")
 
 let win
 
@@ -32,35 +33,90 @@ const updateWindow = () => {
 }
 
 app.whenReady().then(() => {
-  updateWindow()
+  updateWindow();
+
+  // init the app if is the first launche
+
+  const appdata = process.env.APPDATA
+
+  ipcMain.handle('init', () => {
+    dossierPath = appdata + "\\savepassApp"
+    try {
+        fs.access(dossierPath, fs.constants.F_OK, (err) => {
+        if (err) {
+            fs.mkdirSync(appdata + "\\savepassApp")
+            return { first: true }
+        } else {
+            return { first: false }
+        }
+        });
+    } catch (err) {
+        console.log(err)
+        fs.mkdirSync(appdata + "\\savepassApp")
+        return { first: true }
+    }
+  })
+
+  ipcMain.on('setMaster', (event, data) => {
+
+    // set a default value "big" to verify it with the master password to know if the master password is true
+    // see how it work here : src/asstes/js/index.js
+    addPassword('big', 'bigbang', data.master)
+  })
 
   // Update System
 
   ipcMain.handle('get-update', () => {
-    return JSON.stringify({test: true})
+    return JSON.stringify({test: true});
   })
 
   ipcMain.handle('start-update', () => {
-    return JSON.stringify({test: true})
+    return JSON.stringify({test: true});
+  })
+
+  ipcMain.handle('update-finish', () => {
+    createWindow()
   })
 
   // Password System
 
-  ipcMain.handle('get-info', () => {
-    return JSON.stringify({test: true})
+  ipcMain.handle('savepassword', () => {
+    fs.writeFile(appdata + "\\TodoAppFile\\data.json", JSON.stringify(passwordManager), { flag: 'a+' }, (e) => {
+      if (e) {
+          console.log(e)
+      }
+    })
   })
 
-  ipcMain.handle('add-new', () => {
-    return JSON.stringify({test: true})
+  ipcMain.on('get-info', (event, data) => {
+    const all = getall()
+
+    passwordManager = all
+
+    return all
   })
 
-  ipcMain.handle('delete-info', () => {
-    return JSON.stringify({test: true})
+  ipcMain.on('get-pass', (event, data) => {
+    const pass = getPassword(data.service, data.master);
+
+    return pass
+  })
+
+  ipcMain.on('add-new', (event, data) => {
+    const add = addPassword(data.service, data.password, data.master);
+
+    return add
+  })
+
+  ipcMain.on('delete-info', (event, data) => {
+    const remove = deletePassword(data.service);
+
+    return remove
   })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      updateWindow()
+      updateWindow();
     }
   })
 })
@@ -70,3 +126,13 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+function getall() {
+  const all = fs.readFileSync(appdata + '\\savepassApp\\data.json', { encoding: 'utf-8' }, (err, data) => {
+    return data
+  })
+
+  const data = JSON.parse(all)
+
+  return data
+}
