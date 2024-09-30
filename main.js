@@ -15,7 +15,6 @@ const createWindow = () => {
       preload: path.join(__dirname, 'src/preload/preload_main.js')
     }
   })
-
   win.loadFile('index.html')
 }
 
@@ -23,7 +22,7 @@ let winupdate
 
 const updateWindow = () => {
   winupdate = new BrowserWindow({
-    width: 250,
+    width: 400,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload_update.js')
@@ -42,27 +41,41 @@ app.whenReady().then(() => {
 
   ipcMain.handle('init', () => {
     dossierPath = appdata + "\\savepassApp"
+    let isconfirm = false
     try {
-        fs.access(dossierPath, fs.constants.F_OK, (err) => {
+        const res = fs.accessSync(dossierPath, fs.constants.F_OK, (err) => {
         if (err) {
             fs.mkdirSync(appdata + "\\savepassApp")
-            return { first: true }
+            isconfirm = true
         } else {
-            return { first: false }
+          isconfirm = false
         }
         });
+
+        if (isconfirm === true) {
+          return {first: true}
+        } else {
+          return {first: false}
+        }
+
     } catch (err) {
         console.log(err)
         fs.mkdirSync(appdata + "\\savepassApp")
+        console.log("eedsds")
         return { first: true }
     }
   })
 
   ipcMain.on('setMaster', (event, data) => {
 
+    console.log("test")
     // set a default value "big" to verify it with the master password to know if the master password is true
     // see how it work here : src/asstes/js/index.js
     addPassword('big', 'bigbang', data.master)
+
+    console.log("tesdsdsdst")
+
+    winupdate.webContents.send("initPassword", {confirm: true})
   })
 
   // Update System
@@ -103,14 +116,19 @@ app.whenReady().then(() => {
   // Password System
 
   ipcMain.handle('savepassword', () => {
-    fs.writeFile(appdata + "\\TodoAppFile\\data.json", JSON.stringify(passwordManager), { flag: 'a+' }, (e) => {
-      if (e) {
-          console.log(e)
-          return {err: true}
-      }
-    })
-
-    return {err: false}
+    try {
+      fs.writeFile(appdata + "\\savepassApp\\data.json", JSON.stringify(passwordManager), (e) => {
+        if (e) {
+            console.log(e)
+            return {err: true}
+        }
+      })
+  
+      return {err: false}
+    } catch (error) {
+      console.log(error)
+      
+    }
   })
 
   ipcMain.on('get-info', (event, data) => {
