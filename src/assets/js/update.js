@@ -4,7 +4,6 @@ window.addEventListener("load", (e) => {
     if (init.first === true) {
         first()
     } else {
-        supdate()
     }
 })
 
