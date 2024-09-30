@@ -1,9 +1,10 @@
-window.addEventListener("load", (e) => {
-    const init = window.update.init()
+window.addEventListener("load", async (e) => {
+    const init = await window.update.init()
 
     if (init.first === true) {
         first()
     } else {
+        supdate()
     }
 })
 
@@ -23,12 +24,17 @@ async function first() {
 
         if (master !== verif) {
             document.querySelector("#info-form").innerText = "The password is not the same !"
+            Btn.disabled = false
         }
-    })
 
-    // ask to set the master password, and ask to create profil
-    window.update.setmaster({master: master})
-    window.update.savepassword()
+        const setmaster = await window.update.setmaster({master: String(master)})
+
+        window.update.onPasswordcreated((data) => {
+            window.update.savepassword()
+            console.log(data)
+        });
+
+    })
 }
 
 async function supdate() {
