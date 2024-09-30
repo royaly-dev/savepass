@@ -6,7 +6,22 @@
     <title>Updater</title>
 </head>
 <body>
-    <h1>Checking for update...</h1>
+    <h1 id="update-title">Checking for update...</h1>
+    <div id="update-container">
+        <p></p>
+    </div>
+    <form style="display: none;" id="init-form">
+        <p id="info-form">Put your master password here :</p>
+        <div>
+            <input type="password" name="master" id="master">
+            svg
+        </div>
+        <div>
+            <input type="password" name="verif" id="verif">
+            svg
+        </div>
+        <input id="sibmitBtn" type="submit" value="Set Master password">
+    </form>
     <script src="./src/assets/js/update.js"></script>
 </body>
 </html>
