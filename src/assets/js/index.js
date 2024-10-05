@@ -147,6 +147,13 @@ function addNewPassword() {
       const username = document.getElementById("form-username").value
       const master = document.getElementById("master").value
 
+      if (service === "" || password === "" || username === "") {
+         const error = document.getElementById("error-msg-pass")
+         error.innerText = "All fields are required"
+         console.log("All fields are required")
+         return
+      }
+
       const add = await window.db.add({ service: service, username: username, password: password, master: master })
 
       if (add.confirm === false) {
@@ -230,6 +237,13 @@ async function ModifService(element) {
       const password = document.getElementById("form-password").value
       const username = document.getElementById("form-username").value
       const master = document.getElementById("master").value
+
+      if (service === "" || password === "" || username === "") {
+         const error = document.getElementById("error-msg-pass")
+         error.innerText = "All fields are required"
+         console.log("All fields are required")
+         return
+      }
 
       const add = await window.db.modif({ service: service, username: username, password: password, master: master })
 
