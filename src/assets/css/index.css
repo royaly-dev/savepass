@@ -365,4 +365,31 @@ form .div-container {
     outline: none;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.masterpass-textarea input {
+    border: none;
+    outline: none;
+    width: 80%;
+}
+
+.masterpass-textarea svg {
+    width: 20px;
+    padding: 5px;
+}
+
+.masterpass-textarea svg:hover {
+    background-color: #ced4da;
+    border: none;
+    border-radius: 100%;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.masterpass-textarea svg:active {
+    scale: 0.9;
+    transition: all 0.1s;
 }
