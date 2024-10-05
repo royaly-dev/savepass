@@ -31,7 +31,9 @@ async function first() {
 
         window.update.onPasswordcreated((data) => {
             window.update.savepassword()
-            console.log(data)
+            if (data.confirm === true) {
+                supdate()
+            }
         });
 
     })

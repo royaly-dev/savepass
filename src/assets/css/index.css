@@ -171,6 +171,7 @@ body {
     color: black;
     font-family: Roboto;
     font-size: 14px;
+    cursor: pointer;
 }
 
 .bar {
@@ -262,7 +263,14 @@ body {
     background-color: #F9FAFB;
     display: flex;
     justify-content: space-between;
+    flex-direction: column;
     margin: 0 30px;
+}
+
+.list-password-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .logo-action {
@@ -306,4 +314,55 @@ body {
     font-family: Roboto;
     font-size: 14px;
     color: white;
+}
+
+form {
+    gap: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(5px);
+}
+
+form .div-container {
+    width: 30%;
+    background-color: #fff;
+    padding: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    border: none;
+    border-radius: 15px;
+}
+
+.submit-buttom {
+    background-color: #84C7AE;
+    border: 0;
+    padding: 10px;
+    border-radius: 15px;
+    color: #FFFFFF;
+    width: 100%;
+    height: 59px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.masterpass-textarea {
+    border-radius: 10px;
+    border: solid #0000001A 1px;
+    margin: 0;
+    padding: 15px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
 }

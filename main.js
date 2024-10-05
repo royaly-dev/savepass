@@ -1,7 +1,7 @@
-const { ipcMain } = require('electron')
+const { ipcMain, shell } = require('electron')
 const { app, BrowserWindow } = require('electron/main')
 const path = require("node:path")
-const { addPassword, deletePassword, getPassword, passwordManager } = require('./src/script/encrypte')
+const { addPassword, deletePassword, getPassword, passwordManager, setpasswordManager, getpasswordManager, modifPassword } = require('./src/script/encrypte')
 const fs = require("node:fs")
 const { autoUpdater } = require("electron-updater")
 
@@ -9,8 +9,9 @@ let win
 
 const createWindow = () => {
   win = new BrowserWindow({
-    width: 800,
+    width: 900,
     height: 600,
+    minWidth: 875,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload_main.js')
     }
@@ -29,6 +30,7 @@ const updateWindow = () => {
     }
   })
 
+  winupdate.isResizable = false
   winupdate.loadFile('updater.html')
 }
 
@@ -71,7 +73,7 @@ app.whenReady().then(() => {
     console.log("test")
     // set a default value "big" to verify it with the master password to know if the master password is true
     // see how it work here : src/asstes/js/index.js
-    addPassword('big', 'bigbang', data.master)
+    addPassword('big', "master", 'bigbang', data.master)
 
     console.log("tesdsdsdst")
 
@@ -116,8 +118,9 @@ app.whenReady().then(() => {
   // Password System
 
   ipcMain.handle('savepassword', () => {
+    console.log("sucessfuly saved !")
     try {
-      fs.writeFile(appdata + "\\savepassApp\\data.json", JSON.stringify(passwordManager), (e) => {
+      fs.writeFile(appdata + "\\savepassApp\\data.json", JSON.stringify(getpasswordManager()), (e) => {
         if (e) {
             console.log(e)
             return {err: true}
@@ -127,34 +130,70 @@ app.whenReady().then(() => {
       return {err: false}
     } catch (error) {
       console.log(error)
-      
+      return {err: true}
     }
   })
 
-  ipcMain.on('get-info', (event, data) => {
+  ipcMain.handle('get-info', () => {
     const all = getall()
 
-    passwordManager = all
+    if (all === null) {
+      console.log("null")
+      return {err: true}
+    }
+
+    setpasswordManager(all)
 
     return all
   })
 
-  ipcMain.on('get-pass', (event, data) => {
+  ipcMain.on('verif-pass', (event, data) => {
     const pass = getPassword(data.service, data.master);
+    if (pass === null) {
+      win.webContents.send("verif", {confirm: false})
+    } else {
+      win.webContents.send("verif", {confirm: true})
+    }
+  })
 
+  ipcMain.handle('get-pass', (event, data) => {
+    const pass = getPassword(data.service, data.master);
     return pass
   })
 
-  ipcMain.on('add-new', (event, data) => {
-    const add = addPassword(data.service, data.password, data.master);
+  ipcMain.handle('add-new', (event, data) => {
+    const newpass = addPassword(data.service, data.username, data.password, data.master);
 
-    return add
+    if (newpass === null) {
+      return {confirm: false}
+    } else {
+      return {confirm: true}
+    }
   })
 
-  ipcMain.on('delete-info', (event, data) => {
+  ipcMain.handle('modif-pass', (event, data) => {
+    const modif = modifPassword(data.service, data.username, data.password, data.master);
+
+    if (modif === null) {
+      return {confirm: false}
+    } else {
+      return {confirm: true}
+    }
+  })
+
+  ipcMain.handle('delete-info', (event, data) => {
     const remove = deletePassword(data.service);
 
-    return remove
+    if (!remove) {
+      return {confirm: false}
+    } else {
+      return {confirm: true}
+    }
+  })
+
+  ipcMain.handle('link', (event, data) => {
+    console.log("url: " + data.url)
+    shell.openExternal(String(data.url))
   })
 
   app.on('activate', () => {
@@ -171,9 +210,16 @@ app.on('window-all-closed', () => {
 })
 
 function getall() {
+
+  const appdata = process.env.APPDATA
+
   const all = fs.readFileSync(appdata + '\\savepassApp\\data.json', { encoding: 'utf-8' }, (err, data) => {
     return data
   })
+
+  if (all === null) {
+    return null
+  }
 
   const data = JSON.parse(all)
 
