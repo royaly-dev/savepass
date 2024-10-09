@@ -4,6 +4,7 @@ const path = require("node:path")
 const { addPassword, deletePassword, getPassword, passwordManager, setpasswordManager, getpasswordManager, modifPassword } = require('./src/script/encrypte')
 const fs = require("node:fs")
 const { autoUpdater } = require("electron-updater")
+const { passgenn } = require('./src/script/pass_gen')
 
 let win
 
@@ -191,9 +192,16 @@ app.whenReady().then(() => {
     }
   })
 
+  // Link System and pass System
+
   ipcMain.handle('link', (event, data) => {
     console.log("url: " + data.url)
     shell.openExternal(String(data.url))
+  })
+
+  ipcMain.handle('genpass', (event, data) => {
+    const pass = passgenn(20)
+    return pass
   })
 
   app.on('activate', () => {

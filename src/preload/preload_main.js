@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('db', {
   verif: (data) => ipcRenderer.send('verif-pass', data),
   modif: (data) => ipcRenderer.invoke('modif-pass', data),
   openurl: (data) => ipcRenderer.invoke('link', data),
+  genpass: (data) => ipcRenderer.invoke('genpass', data),
 
   onVerif: (callback) => ipcRenderer.on('verif', (event, ...args) => callback(...args)),
   onAll: (callback) => ipcRenderer.on('all', (event, ...args) => callback(...args))

@@ -1,4 +1,4 @@
-function genererMotDePasse(longueur) {
+function passgenn(longueur) {
 
     const min = "abcdefghijklmnopqrstuvwxyz";
     const maj = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -22,5 +22,6 @@ function genererMotDePasse(longueur) {
     return pass.join('');
 }
 
-const newpass = genererMotDePasse(20);
-console.log(newpass);
+module.exports = {
+    passgenn
+}
