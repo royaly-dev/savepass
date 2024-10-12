@@ -105,10 +105,11 @@ body {
 
 .main {
     width: 100%;
+    overflow-y: hidden;
 }
 
 .menu-haut {
-    height: 100px;
+    height: 10%;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -130,7 +131,12 @@ body {
 .list-password {
     padding-top: 30px;
     background-color: #DDE2FF;
-    height: 100%;
+    height: 90%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .bouton-filters {
@@ -177,7 +183,7 @@ body {
 .bar {
     display: flex;
     justify-content: space-between;
-    margin: 30px;
+    width: 90%;
 }
 
 .bar-search {
@@ -189,9 +195,9 @@ body {
 }
 .entête-password {
     background-color: #F9FAFB;
-    margin: 0 30px;
     display: flex;
     padding-left: 20px;
+    width: 50%;
 }
 .text-site {
     padding-left: 20px;
@@ -206,6 +212,11 @@ body {
 .info-site{
     margin-left: 10px;
     row-gap: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
 }
 .nom-site {
     margin: 0;
@@ -221,7 +232,7 @@ body {
 .url-site:hover {
     text-decoration: none;
     color: gray;
-    font-size: 10px;
+    cursor: pointer;
 }
 
 .username {
@@ -233,30 +244,35 @@ body {
 .text-site {
     display: flex;
     align-items: center;
-    margin-left: 50px;
     gap: 30px;
-    font-size: 11px
+    font-family: Roboto;
+    font-size: 15px;
+    width: 40%;
 }
 
 .text-username {
     display: flex;
     align-items: center;
-    margin-left: 40px;
     gap: 30px;
-    font-size: 11px
+    font-family: Roboto;
+    font-size: 15px;
+    min-width: 20%;
 }
 
 .text-password {
-    margin-left: 50px; 
     display: flex;
+    justify-content: space-evenly;
     align-items: center;
-    font-size: 11px
+    font-family: Roboto;
+    font-size: 15px;
+    width: 20%;
 }
 
 .list-password-1-1 {
     padding-left: 20px;
     display: flex;
     align-items: center;
+    width: 50%;
 }
 
 .list-password-1 {
@@ -264,7 +280,6 @@ body {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    margin: 0 30px;
 }
 
 .list-password-container {
@@ -281,7 +296,6 @@ body {
 }
 
 .switch-page {
-    margin: 0 30px; 
     background-color: #F9FAFB;
     display: flex;
     align-items: center;
@@ -292,6 +306,8 @@ body {
     text-align: center;
     padding: 8px 0;
     width: 93%;
+    font-family: Roboto;
+    font-size: 15px;
 }
 
 .bouton-next {
@@ -333,7 +349,7 @@ form {
 }
 
 form .div-container {
-    width: 30%;
+    width: 15%;
     background-color: #fff;
     padding: 25px;
     display: flex;
@@ -374,10 +390,11 @@ form .div-container {
     border: none;
     outline: none;
     width: 80%;
+    font-family: Roboto;
+    font-size: 16px;
 }
 
 .masterpass-textarea svg {
-    width: 20px;
     padding: 5px;
 }
 
@@ -392,4 +409,100 @@ form .div-container {
 .masterpass-textarea svg:active {
     scale: 0.9;
     transition: all 0.1s;
+}
+
+.nom-site {
+    color: #101828;
+    font-family: Roboto;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+}
+
+.url-site {
+    color: #667085;
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    margin: 0;
+}
+.username {
+    color: #232D42;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    width: 20%;
+    word-break: break-word;
+}
+
+.password {
+    color: #232D42;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.password-container:hover ::before {
+    position: absolute;
+    padding: 10px 15px;
+    top: -50%;
+    background-color: #fff;
+    content: "Copy password";
+    color: #232D42;
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 0px #0000001A;
+    z-index: 1;
+}
+
+.password-container:focus ::before {
+    position: absolute;
+    padding: 10px 15px;
+    top: -50%;
+    background-color: #fff;
+    content: "password copied";
+    color: #232D42;
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 0px #0000001A;
+    z-index: 1;
+}
+
+.info-website {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+    width: 40%;
+    position: relative;
+}
+
+.table-container {
+    background-color: #F9FAFB;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    max-height: 80%;
+    overflow-y: scroll;
+}
+
+#error-msg,
+#error-msg-pass {
+    font-family: Roboto;
+    font-size: 15px;
+}
+
+.password-container {
+    width: 20%;
+    position: relative;
 }

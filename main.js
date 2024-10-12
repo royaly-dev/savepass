@@ -10,22 +10,26 @@ let win
 
 const createWindow = () => {
   win = new BrowserWindow({
-    width: 900,
-    height: 600,
-    minWidth: 875,
+    width: 1500,
+    height: 800,
+    minWidth: 1450,
+    minHeight: 650,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload_main.js')
     }
   })
   win.loadFile('index.html')
+  win.menuBarVisible = false
 }
 
 let winupdate
 
 const updateWindow = () => {
   winupdate = new BrowserWindow({
-    width: 400,
+    width: 450,
     height: 600,
+    minWidth: 450,
+    minHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload_update.js')
     }
@@ -33,6 +37,7 @@ const updateWindow = () => {
 
   winupdate.isResizable = false
   winupdate.loadFile('updater.html')
+  winupdate.menuBarVisible = false
 }
 
 app.whenReady().then(() => {
