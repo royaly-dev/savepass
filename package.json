@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "royaly-dev",
-  "license": "CC BY-NC 4.0",
+  "license": "GNU",
   "devDependencies": {
     "electron": "^32.1.2"
   },
