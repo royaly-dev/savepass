@@ -4,17 +4,30 @@
   "description": "Save pass",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "productName": "SavePass",
+    "icon": "./src/assets/img/icon.ico",
+    "win": {
+      "target": "nsis",
+      "icon": "./src/assets/img/icon.ico",
+      "signtoolOptions": {
+        "publisherName": "royaly"
+      },
+      "verifyUpdateCodeSignature": true
+    }
   },
   "keywords": [],
   "author": "royaly-dev",
-  "license": "GNU",
+  "license": "gpl-3.0",
   "devDependencies": {
-    "electron": "^32.1.2"
+    "electron": "^32.1.2",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "electron-builder": "^25.0.5",
     "electron-updater": "^6.3.4"
   }
 }

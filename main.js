@@ -19,7 +19,7 @@ const createWindow = () => {
     }
   })
   win.loadFile('index.html')
-  win.menuBarVisible = false
+  win.removeMenu()
 }
 
 let winupdate
@@ -37,7 +37,7 @@ const updateWindow = () => {
 
   winupdate.isResizable = false
   winupdate.loadFile('updater.html')
-  winupdate.menuBarVisible = false
+  winupdate.removeMenu()
 }
 
 app.whenReady().then(() => {
