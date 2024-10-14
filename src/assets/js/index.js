@@ -86,8 +86,11 @@ async function init(data) {
                <div class="info-website">
                   <img src="https://upload.royaly.dev/data/default.png" alt="Logo du site" class="logo-site"> 
                   <div class="info-site">
-                     <p class="nom-site">${hostname}</p>
-                     <p id="${"url" + String(i)}" class="url-site">${decodeURI(data[i].service)}</p>
+                     <p id="${"title" + String(i)}" class="nom-site">${hostname}</p>
+                     <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 17L17 7M17 7H8M17 7V16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                     </svg>
+                     <p style="display: none;" id="${"url" + String(i)}" class="url-site">${decodeURI(data[i].service)}</p>
                   </div>
                </div>
                <p class="username">${data[i].username}</p>
@@ -111,7 +114,7 @@ async function init(data) {
       if(data[i].username === "master") {
          continue;
       }
-      document.querySelector("#url" + String(i)).onclick = (() => openurl(data[i].service))
+      document.querySelector("#title" + String(i)).onclick = (() => openurl(data[i].service))
       document.querySelector("#pass" + String(i)).onclick = (() => copiepass(data[i].service))
    }
 

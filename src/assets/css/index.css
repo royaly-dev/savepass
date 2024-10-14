@@ -197,8 +197,9 @@ body {
     background-color: #F9FAFB;
     display: flex;
     padding-left: 20px;
-    width: 50%;
+    width: 60%;
 }
+
 .text-site {
     padding-left: 20px;
 }
@@ -210,14 +211,22 @@ body {
     border-radius: 100%;
 }
 .info-site{
-    margin-left: 10px;
     row-gap: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
+    flex-direction: row;
     gap: 5px;
+    transition: all 0.1s;
+    cursor: pointer;
 }
+
+.info-site:hover {
+    scale: 1.05;
+    transform: translateX(2px);
+    transition: all 0.1s;
+}
+
 .nom-site {
     margin: 0;
     font-size: 12px;
@@ -272,7 +281,7 @@ body {
     padding-left: 20px;
     display: flex;
     align-items: center;
-    width: 50%;
+    width: 60%;
 }
 
 .list-password-1 {
@@ -412,11 +421,11 @@ form .div-container {
 }
 
 .nom-site {
-    color: #101828;
+    color: #141b29;
     font-family: Roboto;
     font-size: 15px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
 }
 
 .url-site {
@@ -427,6 +436,7 @@ form .div-container {
     font-weight: 400;
     margin: 0;
 }
+
 .username {
     color: #232D42;
     font-family: Roboto;
