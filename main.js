@@ -94,13 +94,22 @@ app.whenReady().then(() => {
 
       // resolve if an update is available
       autoUpdater.on("update-available", () => {
-        resolve(JSON.stringify({available: true}));
+        console.log("update available")
+        return resolve({ available: true });
       })
 
       // reject if no update is available
       autoUpdater.on("update-not-available", () => {
-        reject(JSON.stringify({available: false}));
+        console.log("no update")
+        return resolve({ available: false });
       })
+
+      // reject if an error occurs
+      autoUpdater.on("error", (error) => {
+        console.error("Error checking for updates:", error);
+        reject(error);
+      });
+
     });
   })
 
@@ -109,7 +118,7 @@ app.whenReady().then(() => {
 
     autoUpdater.on("download-progress", (progressObj) => {
       let d = String(progressObj.percent).split('.')
-      winupdate.webContents.send("updateapp", d[0])
+      winupdate.webContents.send("updateDownload", d[0])
     })
   })
 

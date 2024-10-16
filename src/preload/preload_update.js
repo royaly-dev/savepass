@@ -9,5 +9,6 @@ contextBridge.exposeInMainWorld('update', {
   setmaster: (data) => ipcRenderer.send('setMaster', data),
   savepassword: () => ipcRenderer.invoke('savepassword'),
 
-  onPasswordcreated: (callback) => ipcRenderer.on('initPassword', (event, ...args) => callback(...args))
+  onPasswordcreated: (callback) => ipcRenderer.on('initPassword', (event, ...args) => callback(...args)),
+  onUpdateDownload: (callback) => ipcRenderer.on('updateDownload', (event, ...args) => callback(...args))
 })

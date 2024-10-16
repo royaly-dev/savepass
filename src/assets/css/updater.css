@@ -64,3 +64,20 @@ form {
     flex-direction: column;
     gap: 10px;
 }
+
+.update-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.update-info div {
+    width: 80%;
+    border-radius: 15px;
+    padding: 10px 20px;
+    background-color: #F6FBF9;
+    transition: all 0.3s ease-in-out;
+}
