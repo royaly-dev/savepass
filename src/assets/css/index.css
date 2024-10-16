@@ -358,7 +358,7 @@ form {
 }
 
 form .div-container {
-    width: 15%;
+    width: 20%;
     background-color: #fff;
     padding: 25px;
     display: flex;
@@ -368,6 +368,15 @@ form .div-container {
     gap: 20px;
     border: none;
     border-radius: 15px;
+    position: relative;
+}
+
+.svg-cross {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    cursor: pointer;
 }
 
 .submit-buttom {
@@ -470,6 +479,7 @@ form .div-container {
     border-radius: 10px;
     box-shadow: 0px 0px 10px 0px #0000001A;
     z-index: 1;
+    width: max-content;
 }
 
 .password-container:focus ::before {

@@ -56,3 +56,11 @@ form {
     height: 55px;
     padding-left: 15px;
 }
+
+.init-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}

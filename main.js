@@ -26,7 +26,7 @@ let winupdate
 
 const updateWindow = () => {
   winupdate = new BrowserWindow({
-    width: 450,
+    width: 480,
     height: 600,
     minWidth: 450,
     minHeight: 600,
@@ -35,7 +35,7 @@ const updateWindow = () => {
     }
   })
 
-  winupdate.isResizable = false
+  winupdate.resizable = false
   winupdate.loadFile('updater.html')
   winupdate.removeMenu()
 }

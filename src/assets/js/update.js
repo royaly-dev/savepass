@@ -11,7 +11,7 @@ window.addEventListener("load", async (e) => {
 async function first() {
 
     const form = document.querySelector("form")
-    form.style.display = "unset"
+    form.style.display = "flex"
     
     form.addEventListener('submit', async (e) => {
         e.preventDefault()
