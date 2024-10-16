@@ -47,15 +47,15 @@ async function supdate() {
     const infoUpdate = await window.update.getUpdate()
 
     if (infoUpdate.available === true) {
-        document.querySelector(".update").innerText = "Downloading Update ..."
+        document.querySelector(".update-info h1").innerText = "Downloading Update ..."
         setTimeout(() => {
             window.update.downloadupdate()
         }, 1000);
         window.update.onUpdateDownload((data) => {
-            const progress = `${data}%`
-            document.querySelector(".update-info").querySelector("div").style.background = `linear-gradient(to right, #4caf50 0%, #4caf50 ${progress}, #9dcaf0 ${progress}, #9dcaf0 100%)`
-            if (data === "100") {
-                document.querySelector(".update-info").querySelector("p").innerText = "Installing update..."
+            const progress = `${data.progress}%`
+            document.querySelector(".update-info div").style.background = `linear-gradient(to right, #4caf50 0%, #4caf50 ${progress}, #9dcaf0 ${progress}, #9dcaf0 100%)`
+            if (data.progress === "100") {
+                document.querySelector(".update-info").querySelector("h1").innerText = "Installing update..."
                 setTimeout(() => {
                     window.update.update()
                 }, 200);

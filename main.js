@@ -34,7 +34,7 @@ const updateWindow = () => {
       preload: path.join(__dirname, 'src/preload/preload_update.js')
     }
   })
-
+  
   winupdate.resizable = false
   winupdate.loadFile('updater.html')
   winupdate.removeMenu()
@@ -115,12 +115,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('download-update', () => {
     autoUpdater.downloadUpdate()
-
-    autoUpdater.on("download-progress", (progressObj) => {
-      let d = String(progressObj.percent).split('.')
-      winupdate.webContents.send("updateDownload", d[0])
-    })
   })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log("download")
+    console.log(progressObj)
+    let d = String(progressObj.percent).split('.')
+    winupdate.webContents.send("updateDownload", {progress: d[0]})
+  });
 
   ipcMain.handle('start-update', () => {
     autoUpdater.quitAndInstall()
@@ -248,5 +250,8 @@ function getall() {
   return data
 }
 
+autoUpdater.autoRunAppAfterInstall = true
+autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.forceDevUpdateConfig = true
 autoUpdater.autoDownload = false
 autoUpdater.updateConfigPath = path.join(app.getAppPath(), 'dev-app-update.yml');
