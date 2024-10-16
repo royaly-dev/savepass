@@ -12,7 +12,6 @@
     "icon": "./src/assets/img/icon.ico",
     "win": {
       "target": "nsis",
-      "artifactName": "${productName}-${version}.${ext}",
       "icon": "./src/assets/img/icon.ico",
       "signtoolOptions": {
         "publisherName": "royaly"
