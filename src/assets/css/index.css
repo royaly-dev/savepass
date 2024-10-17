@@ -123,7 +123,6 @@ body {
 }
 
 .menu-haut-profil {
-    border-radius: 100%;
     margin-right: 20px;
     width: 70px;
 }
@@ -192,6 +191,8 @@ body {
     padding-right: 5px;
     max-height: 39px;
     width: 20%;
+    outline: none;
+    padding-left: 10px;
 }
 .entête-password {
     background-color: #F9FAFB;
@@ -496,6 +497,7 @@ form .div-container {
     border-radius: 10px;
     box-shadow: 0px 0px 10px 0px #0000001A;
     z-index: 1;
+    width: max-content;
 }
 
 .info-website {

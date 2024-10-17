@@ -84,7 +84,7 @@ async function init(data) {
             <div class="list-password-1-1">
                <input type="checkbox">
                <div class="info-website">
-                  <img src="https://upload.royaly.dev/data/default.png" alt="Logo du site" class="logo-site"> 
+                  <img id="${"img" + String(i)}" src="https://${hostname}/favicon.ico" alt="Logo du site" class="logo-site"> 
                   <div class="info-site">
                      <p id="${"title" + String(i)}" class="nom-site">${hostname}</p>
                      <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,6 +116,7 @@ async function init(data) {
       }
       document.querySelector("#title" + String(i)).onclick = (() => openurl(data[i].service))
       document.querySelector("#pass" + String(i)).onclick = (() => copiepass(data[i].service))
+      document.querySelector("#img" + String(i)).onerror = (() => document.querySelector("#img" + String(i)).src = "src/assets/img/icon.ico")
    }
 
    document.querySelector("form").style.display = "none"
@@ -297,7 +298,7 @@ async function ModifService(element) {
 
       if (add.confirm === false) {
          const error = document.getElementById("error-msg-pass")
-         error.innerText = "service already exists"
+         error.innerText = "Service don't existe"
          console.log("service already exists")
          return
       } else {
@@ -510,7 +511,7 @@ function search() {
             <div class="list-password-1-1">
                <input type="checkbox">
                <div class="info-website">
-                  <img src="https://upload.royaly.dev/data/default.png" alt="Logo du site" class="logo-site"> 
+                  <img id="${"img" + String(i)}" src="https://${hostname}/favicon.ico" alt="Logo du site" class="logo-site"> 
                   <div class="info-site">
                      <p id="${"title" + String(i)}" class="nom-site">${hostname}</p>
                      <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -542,6 +543,7 @@ function search() {
       }
       document.querySelector("#title" + String(i)).onclick = (() => openurl(search[i].service))
       document.querySelector("#pass" + String(i)).onclick = (() => copiepass(search[i].service))
+      document.querySelector("#img" + String(i)).onerror = (() => document.querySelector("#img" + String(i)).src = "src/assets/img/icon.ico")
    }
 
 }

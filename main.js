@@ -89,28 +89,28 @@ app.whenReady().then(() => {
   // Update System
 
   ipcMain.handle('get-update', () => {
-    autoUpdater.checkForUpdates()
-    return new Promise((resolve, reject) => {
+      autoUpdater.checkForUpdates()
+      return new Promise((resolve, reject) => {
 
-      // resolve if an update is available
-      autoUpdater.on("update-available", () => {
-        console.log("update available")
-        return resolve({ available: true });
-      })
+        // resolve if an update is available
+        autoUpdater.on("update-available", () => {
+          console.log("update available")
+          return resolve({ available: true });
+        })
 
-      // reject if no update is available
-      autoUpdater.on("update-not-available", () => {
-        console.log("no update")
-        return resolve({ available: false });
-      })
+        // reject if no update is available
+        autoUpdater.on("update-not-available", () => {
+          console.log("no update")
+          return resolve({ available: false });
+        })
 
-      // reject if an error occurs
-      autoUpdater.on("error", (error) => {
-        console.error("Error checking for updates:", error);
-        reject(error);
+        // reject if an error occurs
+        autoUpdater.on("error", (error) => {
+          console.error("Error checking for updates:", error);
+          return resolve({ available: false })
+        });
+
       });
-
-    });
   })
 
   ipcMain.handle('download-update', () => {
