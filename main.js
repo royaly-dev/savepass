@@ -1,4 +1,4 @@
-const { ipcMain, shell } = require('electron')
+const { ipcMain, shell, dialog } = require('electron')
 const { app, BrowserWindow } = require('electron/main')
 const path = require("node:path")
 const { addPassword, deletePassword, getPassword, passwordManager, setpasswordManager, getpasswordManager, modifPassword } = require('./src/script/encrypte')
@@ -19,7 +19,7 @@ const createWindow = () => {
     }
   })
   win.loadFile('index.html')
-  //win.removeMenu()
+  win.removeMenu()
 }
 
 let winupdate
@@ -241,7 +241,7 @@ app.whenReady().then(() => {
         }
       }
 
-      return {skiped : skip, confirm: array.length - skip}
+      return {skip: skip, confirm: array.length - skip}
 
     } catch (error) {
       return {err: true}
@@ -272,9 +272,14 @@ app.whenReady().then(() => {
         exportArray.push({service: array[i].service, username: array[i].username, password: getpass})
       }
 
-      fs.writeFileSync(path, JSON.stringify(exportArray), { encoding: 'utf-8', flag: 'w' });
-
-      return {confirm: true}
+      fs.writeFileSync(path, JSON.stringify(exportArray), { encoding: 'utf-8', flag: 'w' }, (err) => {
+        if (err) {
+          console.log("error : " + err)
+          return {confirm: false}
+        } else {
+          return {confirm: true}
+        }
+      });
 
     } catch (error) {
       console.log(error)
@@ -282,6 +287,20 @@ app.whenReady().then(() => {
     }
 
   })
+
+  ipcMain.handle('select-dirs', async (event) => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    return result.filePaths;
+  });
+
+  ipcMain.handle('select-file', async (event) => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile']
+    });
+    return result.filePaths;
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

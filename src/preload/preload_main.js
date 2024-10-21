@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('db', {
   genpass: (data) => ipcRenderer.invoke('genpass', data),
   load: (data) => ipcRenderer.invoke('load', data),
   export: (data) => ipcRenderer.invoke('export', data),
+  selectDirs: () => ipcRenderer.invoke('select-dirs'),
+  selectFiles: () => ipcRenderer.invoke('select-file'),
 
   // Event listeners
 
