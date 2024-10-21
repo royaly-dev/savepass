@@ -552,3 +552,60 @@ async function copiepass(service) {
    const pass = await window.db.get({ service: service, master: document.getElementById("master").value })
    navigator.clipboard.writeText(pass)
 }
+
+async function loadNewJson(path) {
+   const data = await window.db.load({path: path, master: document.querySelector("#master").value})
+   
+   if (data.err === true) {
+      console.log("error")
+      return
+   }
+
+   notif(String(`${data.confirm} has been added, and ${data.skip} has been skiped`))
+
+   await window.db.save()
+
+   setTimeout( async () => {
+      const initdata = await window.db.all()
+      init(initdata)
+   }, 200);
+}
+
+async function notif(msg) {
+   const newnotig = document.createElement("div")
+   newnotig.id = "notif"
+   newnotig.className = "notif-container"
+   newnotig.innerHTML = `
+      <p>${msg}</p>
+      <button>Ok</button>
+   `
+   document.body.append(newnotig)
+}
+
+async function exportNewJson(path) {
+   const data = window.db.export({path: path, master: document.querySelector("#master").value})
+
+   if (data.confirm == false) {
+      notif(`Error while exporting the json`)
+   } else {
+      notif(`Successfuly exported the json !`)
+   }
+}
+
+async function opensettings() {
+   const settings = document.createElement("div")
+   settings.id = "settings"
+   settings.className = "settings"
+   settings.innerHTML = `
+   <div class="settings-main-container">
+      <p id="error-settings-msg"></p>
+      <div id="settings-container">
+         <label for="loadjson">Import Password</label>
+         <input type="file" id="loadjson">
+         <label for="exportjson">Export Password</label>
+         <input type="file" id="exportjson">
+      </div>
+   </div>
+   `
+   document.body.append(settings)
+}

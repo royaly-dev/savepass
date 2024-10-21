@@ -528,3 +528,18 @@ form .div-container {
     width: 20%;
     position: relative;
 }
+
+.settings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    backdrop-filter: blur(5px);
+    border: none;
+    border-radius: 15px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}

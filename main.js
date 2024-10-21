@@ -19,7 +19,7 @@ const createWindow = () => {
     }
   })
   win.loadFile('index.html')
-  win.removeMenu()
+  //win.removeMenu()
 }
 
 let winupdate
@@ -208,7 +208,7 @@ app.whenReady().then(() => {
     }
   })
 
-  // Link System and pass System
+  // Link System and gen pass System
 
   ipcMain.handle('link', (event, data) => {
     console.log("url: " + data.url)
@@ -218,6 +218,69 @@ app.whenReady().then(() => {
   ipcMain.handle('genpass', (event, data) => {
     const pass = passgenn(20)
     return pass
+  })
+
+  // settings system
+
+  ipcMain.handle('load', async (event, data) => {
+  
+    const path = data.path
+    let skip = 0
+
+    try {
+      const arraystring = fs.readFileSync(path, { encoding: 'utf-8' }, (err, data) => {
+        return data
+      })
+
+      const array = JSON.parse(arraystring)
+
+      for (let i = 0; i < array.length; i++) {
+        const addpass = addPassword(array[i].service, array[i].username, array[i].password, data.master)
+        if (addpass === null) {
+          skip++
+        }
+      }
+
+      return {skiped : skip, confirm: array.length - skip}
+
+    } catch (error) {
+      return {err: true}
+    }
+
+
+  })
+
+  ipcMain.handle('export', async (event, data) => {
+
+    const path = data.path
+    const master = data.master
+
+    try {
+      const arraystring = fs.readFileSync(appdata + "\\savepassApp\\data.json", { encoding: 'utf-8' }, (err, dataarray) => {
+        return dataarray
+      })
+
+      const array = JSON.parse(arraystring)
+      const exportArray = []
+
+      for (let i = 0; i < array.length; i++ ) {
+        if (array[i].service === "big") {
+          continue
+        }
+        const getpass = getPassword(array[i].service, master)
+
+        exportArray.push({service: array[i].service, username: array[i].username, password: getpass})
+      }
+
+      fs.writeFileSync(path, JSON.stringify(exportArray), { encoding: 'utf-8', flag: 'w' });
+
+      return {confirm: true}
+
+    } catch (error) {
+      console.log(error)
+      return {confirm: false}
+    }
+
   })
 
   app.on('activate', () => {

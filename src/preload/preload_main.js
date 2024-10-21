@@ -1,6 +1,9 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('db', {
+
+  // Functions
+
   all: () => ipcRenderer.invoke('get-info'),
   get: (data) => ipcRenderer.invoke('get-pass', data),
   add: (data) => ipcRenderer.invoke('add-new', data),
@@ -10,6 +13,10 @@ contextBridge.exposeInMainWorld('db', {
   modif: (data) => ipcRenderer.invoke('modif-pass', data),
   openurl: (data) => ipcRenderer.invoke('link', data),
   genpass: (data) => ipcRenderer.invoke('genpass', data),
+  load: (data) => ipcRenderer.invoke('load', data),
+  export: (data) => ipcRenderer.invoke('export', data),
+
+  // Event listeners
 
   onVerif: (callback) => ipcRenderer.on('verif', (event, ...args) => callback(...args)),
   onAll: (callback) => ipcRenderer.on('all', (event, ...args) => callback(...args))
