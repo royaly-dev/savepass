@@ -5,6 +5,7 @@ const { addPassword, deletePassword, getPassword, passwordManager, setpasswordMa
 const fs = require("node:fs")
 const { autoUpdater } = require("electron-updater")
 const { passgenn } = require('./src/script/pass_gen')
+const { Server } = require('node:http')
 
 let win
 
@@ -337,3 +338,30 @@ autoUpdater.autoInstallOnAppQuit = true
 autoUpdater.forceDevUpdateConfig = true
 autoUpdater.autoDownload = false
 autoUpdater.updateConfigPath = path.join(app.getAppPath(), 'dev-app-update.yml');
+
+//webserver for the extension in the browser
+
+Server((req, res) => {
+  if (req.url === "/status") {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: "ok" }));
+  } else if (req.url === "/get") {
+    if (req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk.toString();
+      });
+      req.on("end", () => {
+        body = JSON.parse(body);
+        const pass = getPassword(body.service, body.master);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(pass));
+      });
+    } else {
+      res.writeHead(405, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: "Method not allowed" }));
+    }
+  }
+}).listen(9560, () => {
+  console.log("Server started on http://localhost:9560");
+});
