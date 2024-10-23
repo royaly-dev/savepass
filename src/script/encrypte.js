@@ -54,6 +54,19 @@ function getPassword(service, masterPassword) {
     return decryptedPassword;
 }
 
+function getPasswordWithUrlHostname(service, masterPassword) {
+    console.log(service)
+    const entry = passwordManager
+        .filter(entry => entry.service !== "big")
+        .find(entry => new URL(entry.service).hostname === service);
+    if (!entry) {
+        console.log("service doesn't exist");
+        return null;
+    }
+    const decryptedPassword = decryptPassword(entry.encryptedPassword, masterPassword);
+    return {password: decryptedPassword, username: entry.username};
+}
+
 function deletePassword(service) {
     const index = passwordManager.findIndex(entry => entry.service === service);
     if (index !== -1) {
@@ -71,5 +84,6 @@ module.exports = {
     passwordManager,
     setpasswordManager,
     getpasswordManager,
-    modifPassword
+    modifPassword,
+    getPasswordWithUrlHostname
 }

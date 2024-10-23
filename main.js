@@ -1,13 +1,14 @@
 const { ipcMain, shell, dialog } = require('electron')
 const { app, BrowserWindow } = require('electron/main')
 const path = require("node:path")
-const { addPassword, deletePassword, getPassword, passwordManager, setpasswordManager, getpasswordManager, modifPassword } = require('./src/script/encrypte')
+const { addPassword, deletePassword, getPassword, passwordManager, setpasswordManager, getpasswordManager, modifPassword, getPasswordWithUrlHostname } = require('./src/script/encrypte')
 const fs = require("node:fs")
 const { autoUpdater } = require("electron-updater")
 const { passgenn } = require('./src/script/pass_gen')
 const { Server } = require('node:http')
 
 let win
+let masterforweb
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -166,6 +167,7 @@ app.whenReady().then(() => {
   })
 
   ipcMain.on('verif-pass', (event, data) => {
+    masterforweb = data.master
     const pass = getPassword(data.service, data.master);
     if (pass === null) {
       win.webContents.send("verif", {confirm: false})
@@ -342,6 +344,9 @@ autoUpdater.updateConfigPath = path.join(app.getAppPath(), 'dev-app-update.yml')
 //webserver for the extension in the browser
 
 Server((req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.url === "/status") {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: "ok" }));
@@ -353,7 +358,7 @@ Server((req, res) => {
       });
       req.on("end", () => {
         body = JSON.parse(body);
-        const pass = getPassword(body.service, body.master);
+        const pass = getPasswordWithUrlHostname(body.service, String(masterforweb));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(pass));
       });
