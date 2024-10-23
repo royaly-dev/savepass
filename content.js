@@ -21,9 +21,9 @@ window.addEventListener('load', async () => {
             passwordFields.forEach(field => {
                 field.value = response.password;
                 if (field.parentElement.querySelector('input[type="text"]')) {
-                    field.parentElement.querySelector('input[type="text"]').value = response.username;
+                    document.querySelector('input[type="text"]').value = response.username;
                 } else if (field.parentElement.querySelector('input[type="email"]')) {
-                    field.parentElement.querySelector('input[type="email"]').value = response.username
+                    document.querySelector('input[type="email"]').value = response.username
                 }
             });
         });
