@@ -5,6 +5,11 @@ window.addEventListener('load', async () => {
         return;
     }
 
+    const verifurl = window.location.href;
+    if (!verifurl.includes('login') ) {
+        return;
+    }
+
     const passwordFields = document.querySelectorAll('input[type="password"]');
     if (passwordFields.length > 0) {
         const additionalData = {
@@ -13,11 +18,13 @@ window.addEventListener('load', async () => {
 
         // get the password with the url hostname
         chrome.runtime.sendMessage({ action: "getPassword", data: additionalData }, (response) => {
-            console.log("Réponse reçue:", response);
             passwordFields.forEach(field => {
-                console.log("Remplissage du champ de mot de passe");
                 field.value = response.password;
-                field.parentElement.querySelector('input[type="text"]').value = response.username;
+                if (field.parentElement.querySelector('input[type="text"]')) {
+                    field.parentElement.querySelector('input[type="text"]').value = response.username;
+                } else if (field.parentElement.querySelector('input[type="email"]')) {
+                    field.parentElement.querySelector('input[type="email"]').value = response.username
+                }
             });
         });
     }
