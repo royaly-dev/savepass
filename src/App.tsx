@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import MasterSetup from './components/MasterSetup';
 
 function Homepage() {
 
@@ -9,14 +10,15 @@ function Homepage() {
   useEffect(() => {
     const t: any = window
 
-    setTest(t.test.test()[0])
+    setTest(t.savepass.IsRegistred())
 
   }, [])
 
   return (
     <div className="p-5">
+      <MasterSetup />
       <h1 className="font-bold text-2xl underline text-red-700">
-        test : {test}
+        test : {test ? "test" : "testt"}
       </h1>
       <p className="mt-4 text-gray-600 animate-bounce">test tailwinds</p>
       <Card>

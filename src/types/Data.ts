@@ -1,0 +1,1 @@
+export type Data = {password: {id: string, password: string, accountid: string, url: string}[], opt: {id: string, key: string, name: string, icon: string}[], acount: {id: string, username: string, mail: string}[]}
