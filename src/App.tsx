@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import MasterSetup from './components/MasterSetup';
+import MasterPasswordSetup from '@/components/MasterPasswordSetup';
+import MasterPasswordCheck from '@/components/MasterPasswordCheck';
 
 function Homepage() {
 
@@ -15,26 +16,10 @@ function Homepage() {
   }, [])
 
   return (
-    <div className="p-5">
-      <MasterSetup />
-      <h1 className="font-bold text-2xl underline text-red-700">
-        test : {test ? "test" : "testt"}
-      </h1>
-      <p className="mt-4 text-gray-600 animate-bounce">test tailwinds</p>
-      <Card>
-        <CardHeader>
-          <CardTitle>Test shadcn ui title</CardTitle>
-          <CardDescription>Test shadcn ui description</CardDescription>
-          <CardAction>Test shadcn ui action</CardAction>
-        </CardHeader>
-        <CardContent>
-          <p>Test shadcn ui content</p>
-        </CardContent>
-        <CardFooter>
-          <p>Test shadcn ui footer</p>
-        </CardFooter>
-      </Card>
-    </div>
+    <>
+      <MasterPasswordCheck />
+      <MasterPasswordSetup />
+    </>
   );
 }
 

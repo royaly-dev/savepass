@@ -4,7 +4,7 @@ import { Data } from "@/types/Data"
 const { contextBridge } = require('electron')
 
 contextBridge.exposeInMainWorld('savepass', {
-  RegisterMaster: async (master: string) => {
+  Register: async (master: string) => {
     return await ipcRenderer.invoke("Register", master)
   },
   IsRegistred: async () => {

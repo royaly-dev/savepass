@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Eye, EyeOff } from 'lucide-react'
 
-export default function MasterSetup() {
+export default function MasterPasswordSetup() {
     const [isRegister, setIsRegister] = useState<boolean>(true);
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -30,10 +30,12 @@ export default function MasterSetup() {
                 <DialogContent className="sm:max-w-106.25">
                     <form onSubmit={async(e) => {
                         e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
+                        const formData = new FormData(e.currentTarget)
 
-                        const master = formData.get("Master");
-                        const masterCheck = formData.get("masterCheck");
+                        const master = String(formData.get("Master"))
+                        const masterCheck = String(formData.get("masterCheck"))
+
+                        console.log(master)
                         
                         if (master.toString().length < 8) {
                             toast.error("Your password must be at least 8 characters")
@@ -45,8 +47,16 @@ export default function MasterSetup() {
                             return
                         }
 
-                        await (window as any).savepass.RegisterMaster(master)
-                        setIsRegister(!isRegister)
+                        const register = await (window as any).savepass.Register(master)
+                        
+                        if (register) {
+                            setIsRegister(!isRegister)
+                            toast.success("Your password has been successfully saved !")
+                            window.location.reload()
+                        } else {
+                            toast.error("An error occurred")
+                        }
+                        
                     }}>
                         <DialogHeader>
                             <DialogTitle>Setup your Master password</DialogTitle>

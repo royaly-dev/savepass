@@ -9,6 +9,8 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 let master = ""
 
+store.delete("master")
+
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
@@ -41,10 +43,13 @@ ipcMain.handle("IsRegister", async () => {
     }
 })
 
-ipcMain.handle("Register", (event, data) => {
+ipcMain.handle("Register", async (event, data) => {
   if (!store.get("master")) {
-    store.set("master", data)
-    store.set("data", {password: [], opt: [], acount: []})
+    await store.set("master", CryptoJS.AES.encrypt(data, data).toString())
+    await store.set("data", {password: [], opt: [], acount: []})
+    return true
+  } else {
+    return false
   }
 })
 
