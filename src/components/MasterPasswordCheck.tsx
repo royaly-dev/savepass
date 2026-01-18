@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import { Eye, EyeOff } from 'lucide-react'
 
 
-export default function MasterPasswordCheck() {
+export default function MasterPasswordCheck(props: {confirmCheck(): void}) {
     const [isRegister, setIsRegister] = useState<boolean>(false)
     const [pass, setPass] = useState<string>()
 
@@ -36,6 +36,7 @@ export default function MasterPasswordCheck() {
         if (check) {
             toast.success("Your password has been unlocked !")
             setIsRegister(false)
+            props.confirmCheck()
         } else {
             toast.error("The password you provided is incorrect !")
         }

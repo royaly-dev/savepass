@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, clipboard, ipcMain, shell } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 
@@ -9,8 +9,6 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 let master = ""
 
-store.delete("master")
-
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
@@ -19,6 +17,7 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
@@ -46,7 +45,7 @@ ipcMain.handle("IsRegister", async () => {
 ipcMain.handle("Register", async (event, data) => {
   if (!store.get("master")) {
     await store.set("master", CryptoJS.AES.encrypt(data, data).toString())
-    await store.set("data", {password: [], opt: [], acount: []})
+    await store.set("data", CryptoJS.AES.encrypt(JSON.stringify({password: [], opt: [], acount: [{id: "test", mail: "test@test.ts"}]}), data).toString())
     return true
   } else {
     return false
@@ -70,7 +69,17 @@ ipcMain.handle("GetData", () => {
     return []
   }
   
-  return CryptoJS.AES.decrypt(JSON.parse(store.get("data")), master)
+  console.log(JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)))
+
+  return JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
+})
+
+ipcMain.on("openLink", (event, data) => {
+  shell.openExternal(String(data))
+})
+
+ipcMain.on("copyToClipBoard", (event, data) => {
+  clipboard.writeText(data)
 })
 
 ipcMain.on("SaveData", (event, data) => {
@@ -78,7 +87,7 @@ ipcMain.on("SaveData", (event, data) => {
     return
   }
 
-  store.set('data', CryptoJS.AES.encrypt(JSON.stringify(data), master))
+  store.set('data', CryptoJS.AES.encrypt(JSON.stringify(data), master).toString())
 })
 
 app.on('activate', () => {

@@ -17,6 +17,12 @@ contextBridge.exposeInMainWorld('savepass', {
     return await ipcRenderer.invoke("GetData")
   },
   SaveData: async (data: Data) => {
-    ipcRenderer.invoke("SaveData", data)
+    ipcRenderer.send("SaveData", data)
+  },
+  openLink: (link: string) => {
+    ipcRenderer.send("openLink", link)
+  },
+  copyToClipBoard: (text: string) => {
+    ipcRenderer.send("copyToClipBoard", text)
   }
 })
