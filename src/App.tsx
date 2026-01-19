@@ -16,6 +16,8 @@ function Homepage() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [data, setData] = useState<Data>()
   const [isAddingPassword, setIsAddingPassword] = useState<boolean>(false)
+  const [typeAddingPassword, setTypeAddingPassword] = useState<string>("add")
+  const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData>(null)
 
   useEffect(() => {
     if (!carouselApi) {
@@ -31,6 +33,19 @@ function Homepage() {
   const refresh = async () => {
     setData(await (window as any).savepass.GetData())
     console.log(data)
+    setTypeAddingPassword("add")
+    setUpdatePasswordData(null)
+  }
+
+  const requestPasswordEdit = (data: PasswordData) => {
+    setTypeAddingPassword("modify")
+    setIsAddingPassword(true)
+    setUpdatePasswordData(data)
+  }
+
+  const RequestPasswordDeletion = async (dataDeletion: PasswordData) => {
+    (window as any).savepass.SaveData({...data, password: data.password.filter(item => item.id != dataDeletion.id)})
+    refresh()
   }
 
   if (!confirm) {
@@ -42,7 +57,7 @@ function Homepage() {
 
   return (
     <main className='grid grid-cols-10 h-screen'>
-        <ManagePassword openChange={() => {setIsAddingPassword(false)}} requestPassword={isAddingPassword} data={data} refresh={refresh} />
+        <ManagePassword updateData={updatePasswordData} openChange={() => {setIsAddingPassword(false); setTypeAddingPassword("add"); setUpdatePasswordData(null)}} type={typeAddingPassword} requestPassword={isAddingPassword} data={data} refresh={refresh} />
       <nav className='flex self-center col-span-1 w-full justify-center items-center flex-col my-2 bg-muted-foreground/15 h-fit rounded-md py-2 mx-2 box-content'>
         <KeyRound size={24} color={currentSection == "password" ? '#fff' : '#000'}  onClick={() => {setCurrentSection("password")}} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "password" ? 'bg-foreground' : '')} />
         <RectangleEllipsis color={currentSection == "opt" ? '#fff' : '#000'} size={24} onClick={() => {setCurrentSection("opt")}} className={'p-1 py-1.5 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "opt" ? 'bg-foreground' : '')} />
@@ -58,7 +73,7 @@ function Homepage() {
                 {
                   data?.password && data?.password.length != 0
                   ? data.password.map((item) => {
-                    return <PasswordCard data={{id: item.id, accountid: item.accountid, password: item.password, url: item.url}} account={data.acount.find(account => account.id === item.accountid)}/>
+                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id, accountid: item.accountid, password: item.password, url: item.url}} account={data.acount.find(account => account.id === item.accountid)}/>
                   })
                   : <div className='flex justify-center items-center flex-col'>
                     <h3 className='text-xl text-muted-foreground'>No password saved</h3>

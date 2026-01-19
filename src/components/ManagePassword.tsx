@@ -15,35 +15,53 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Data, PasswordData } from "@/types/Data"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-export default function ManagePassword(props: {data: Data, requestPassword: boolean, refresh(): void, openChange(): void} ) {
+export default function ManagePassword(props: {data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void} ) {
 
     const [password, setPassword] = useState<PasswordData>({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})
+
+    useEffect(() => {
+        if(props?.updateData?.id) {
+            setPassword(props.updateData)
+        }
+    }, [props.requestPassword])
 
     const savepassord = () => {
         try {
             let newdata = props.data
-            newdata.password.push(password)
+            if (props.type == "add") {
+                newdata.password.push(password)
+            } else {
+
+                const index = newdata.password.findIndex(
+                    item => item.id === password.id
+                )
+
+                if (index != -1) {
+                    newdata.password[index] = password
+                }
+            }
             if (new URL(password.url).hostname) {
                 (window as any).savepass.SaveData(newdata)
                 props.openChange()
+                setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})
             }
         } catch (error) {
-            console.log(error)
+            toast.error("Your your must be a valid url !")
         }
     }
 
     return (
-        <Dialog open={props.requestPassword} onOpenChange={props.openChange} >
+        <Dialog open={props.requestPassword} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})}} >
             <DialogContent className="w-fit">
                 <DialogHeader>
-                    <DialogTitle>Add a new Password</DialogTitle>
+                    <DialogTitle>{props.type == "add" ? "Add a new Password" : "Modify your password"}</DialogTitle>
                 </DialogHeader>
                 <div className="flex justify-center items-start flex-col gap-4">
                     <Label htmlFor="url">URL</Label>
-                    <Input onChange={(e) => {setPassword({...password, url: e.currentTarget.value})}} id="url" type="url"></Input>
+                    <Input value={password.url} onChange={(e) => {setPassword({...password, url: e.currentTarget.value})}} id="url" type="url"></Input>
                     <Label>Account</Label>
                     <Select value={password.accountid} onValueChange={(value) => {setPassword({...password, accountid: value})}}>
                         <SelectTrigger className="w-full">
@@ -53,7 +71,7 @@ export default function ManagePassword(props: {data: Data, requestPassword: bool
                             {
                                 props?.data?.acount && props.data.acount.map((account) => {
                                     return (
-                                        <SelectItem value={account.id}>{account.mail}</SelectItem>
+                                        <SelectItem key={account.id} value={account.id}>{account.mail}</SelectItem>
                                     )
                                 })
                             }
@@ -61,7 +79,7 @@ export default function ManagePassword(props: {data: Data, requestPassword: bool
                         </SelectContent>
                     </Select>
                     <Label htmlFor="password">Password</Label>
-                    <Input onChange={(e) => {setPassword({...password, password: e.currentTarget.value})}} id="password" type="password"></Input>
+                    <Input value={password.password} onChange={(e) => {setPassword({...password, password: e.currentTarget.value})}} id="password" type="password"></Input>
                     <Button onClick={savepassord} variant="default" className="w-full mt-4">Save</Button>
                 </div>
             </DialogContent>

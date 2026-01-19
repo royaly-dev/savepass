@@ -2,8 +2,10 @@ import { ArrowUpRight, Copy, EllipsisVertical, Eye, EyeOff, Globe } from "lucide
 import { Card, CardContent } from "./ui/card";
 import { AccountData, PasswordData } from "@/types/Data";
 import { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { toast } from "sonner";
 
-export default function PasswordCard(props: { data: PasswordData, account: AccountData }) {
+export default function PasswordCard(props: { data: PasswordData, account: AccountData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
 
     const [showpass, setShowpass] = useState<boolean>(false)
 
@@ -13,10 +15,11 @@ export default function PasswordCard(props: { data: PasswordData, account: Accou
 
     const copyToClipBoard = (text: string) => {
         (window as any).savepass.copyToClipBoard(text)
+        toast.success("Copied to clipboard !")
     }
 
     return (
-        <Card className="w-full p-3">
+        <Card key={props.data.id} className="w-full p-3">
             <CardContent className="flex justify-between items-center gap-2 px-0">
                 <div className="flex justify-center items-center gap-2">
                     <Globe size={24} color="#169c92" className="p-3 box-content bg-[#aeddd9] rounded-md"/>
@@ -38,7 +41,13 @@ export default function PasswordCard(props: { data: PasswordData, account: Accou
                         : <EyeOff onClick={() => {setShowpass(false)}} size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
                     }
                     <Copy onClick={() => {copyToClipBoard(props.data.password)}} size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
-                    <EllipsisVertical size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger><EllipsisVertical size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" /></DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => {props.requestEdit(props.data)}} variant="default">Modify</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {props.requestDelete(props.data)}} variant="destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </CardContent>
         </Card>

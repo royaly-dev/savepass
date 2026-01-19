@@ -68,8 +68,6 @@ ipcMain.handle("GetData", () => {
   if (master == "") {
     return []
   }
-  
-  console.log(JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)))
 
   return JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
 })
