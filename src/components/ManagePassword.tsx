@@ -20,7 +20,7 @@ import { toast } from "sonner"
 
 export default function ManagePassword(props: {data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void} ) {
 
-    const [password, setPassword] = useState<PasswordData>({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})
+    const [password, setPassword] = useState<PasswordData>({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
 
     useEffect(() => {
         if(props?.updateData?.id) {
@@ -46,7 +46,7 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
             if (new URL(password.url).hostname) {
                 (window as any).savepass.SaveData(newdata)
                 props.openChange()
-                setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})
+                setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
             }
         } catch (error) {
             toast.error("Your your must be a valid url !")
@@ -54,7 +54,7 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
     }
 
     return (
-        <Dialog open={props.requestPassword} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: ""})}} >
+        <Dialog open={props.requestPassword} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})}} >
             <DialogContent className="w-fit">
                 <DialogHeader>
                     <DialogTitle>{props.type == "add" ? "Add a new Password" : "Modify your password"}</DialogTitle>
@@ -68,13 +68,6 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
                             <SelectValue placeholder="Select an account" />
                         </SelectTrigger>
                         <SelectContent>
-                            {
-                                props?.data?.acount && props.data.acount.map((account) => {
-                                    return (
-                                        <SelectItem key={account.id} value={account.id}>{account.mail}</SelectItem>
-                                    )
-                                })
-                            }
                             <SelectItem value="New">add an account</SelectItem>
                         </SelectContent>
                     </Select>

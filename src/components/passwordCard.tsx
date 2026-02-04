@@ -5,7 +5,7 @@ import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { toast } from "sonner";
 
-export default function PasswordCard(props: { data: PasswordData, account: AccountData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
+export default function PasswordCard(props: { data: PasswordData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
 
     const [showpass, setShowpass] = useState<boolean>(false)
 
@@ -29,7 +29,7 @@ export default function PasswordCard(props: { data: PasswordData, account: Accou
                             <ArrowUpRight className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
                         </div>
                         <div className="text-muted-foreground flex justify-center items-center gap-1">
-                            <span onClick={() => {copyToClipBoard(props.account.mail)}} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{props.account.mail}</span>
+                            <span onClick={() => {copyToClipBoard(props.data.mail)}} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{props.data.mail}</span>
                             <span onClick={() => {copyToClipBoard(props.data.password)}} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{showpass ? props.data.password : "********"}</span>
                         </div>
                     </div>

@@ -61,7 +61,6 @@ function Homepage() {
       <nav className='flex self-center col-span-1 w-full justify-center items-center flex-col my-2 bg-muted-foreground/15 h-fit rounded-md py-2 mx-2 box-content'>
         <KeyRound size={24} color={currentSection == "password" ? '#fff' : '#000'}  onClick={() => {setCurrentSection("password")}} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "password" ? 'bg-foreground' : '')} />
         <RectangleEllipsis color={currentSection == "opt" ? '#fff' : '#000'} size={24} onClick={() => {setCurrentSection("opt")}} className={'p-1 py-1.5 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "opt" ? 'bg-foreground' : '')} />
-        <User size={24} color={currentSection == "user" ? '#fff' : '#000'} onClick={() => {setCurrentSection("user")}} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "user" ? 'bg-foreground' : '')} />
         <Settings size={24} color={currentSection == "settings" ? '#fff' : '#000'} onClick={() => {setCurrentSection("settings")}} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "settings" ? 'bg-foreground' : '')} />
       </nav>
       <Carousel setApi={setCarouselApi} orientation='vertical' className='h-screen col-end-10 col-start-3'>
@@ -73,7 +72,7 @@ function Homepage() {
                 {
                   data?.password && data?.password.length != 0
                   ? data.password.map((item) => {
-                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id, accountid: item.accountid, password: item.password, url: item.url}} account={data.acount.find(account => account.id === item.accountid)}/>
+                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id, accountid: item.accountid, password: item.password, url: item.url, mail: item.mail}}/>
                   })
                   : <div className='flex justify-center items-center flex-col'>
                     <h3 className='text-xl text-muted-foreground'>No password saved</h3>
@@ -83,7 +82,6 @@ function Homepage() {
             </div>
           </CarouselItem>
           <CarouselItem><p className='h-screen text-center'>opt</p></CarouselItem>
-          <CarouselItem><p className='h-screen text-center'>user</p></CarouselItem>
           <CarouselItem><p className='h-screen text-center'>settings</p></CarouselItem>
         </CarouselContent>
       </Carousel>
