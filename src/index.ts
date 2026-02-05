@@ -1,6 +1,7 @@
-import { app, BrowserWindow, clipboard, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, clipboard, ipcMain, session, shell } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
+import { generate } from 'otplib';
 
 const store: any = new Store();
 
@@ -8,10 +9,6 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 let master = ""
-
-if (require('electron-squirrel-startup')) {
-  app.quit();
-}
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
@@ -26,7 +23,25 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 };
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          `
+          default-src 'self';
+          script-src 'self' 'unsafe-eval';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: https:;
+          connect-src 'self' ws: http:;
+          `
+        ]
+      }
+    })
+  });
+  createWindow()
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

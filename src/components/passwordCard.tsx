@@ -8,6 +8,7 @@ import { toast } from "sonner";
 export default function PasswordCard(props: { data: PasswordData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
 
     const [showpass, setShowpass] = useState<boolean>(false)
+    const [errorLoadingImage, setErrorLoadingImage] = useState<boolean>(false)
 
     const openLink = (link: string) => {
         (window as any).savepass.openLink(link)
@@ -22,7 +23,13 @@ export default function PasswordCard(props: { data: PasswordData, requestEdit(da
         <Card key={props.data.id} className="w-full p-3">
             <CardContent className="flex justify-between items-center gap-2 px-0">
                 <div className="flex justify-center items-center gap-2">
-                    <Globe size={24} color="#169c92" className="p-3 box-content bg-[#aeddd9] rounded-md"/>
+                    {errorLoadingImage
+                        ? <Globe size={24} color="#169c92" className="p-3 box-content bg-[#aeddd9] rounded-md"/>
+                        : <div className="p-3 box-content rounded-md relative overflow-hidden">
+                            <img style={{height: 24, width: 24, borderRadius: "100%"}} src={"https://"+(new URL(props.data.url).hostname)+"/favicon.ico"} onError={() => {setErrorLoadingImage(true)}} className="z-10 relative" />
+                            <img src={"https://"+(new URL(props.data.url).hostname)+"/favicon.ico"} onError={() => {setErrorLoadingImage(true)}} className="absolute w-full top-0 left-0 z-0 rounded-md blur-md" />
+                        </div>
+                    }
                     <div className="flex justify-center items-start flex-col">
                         <div onClick={() => {openLink(props.data.url)}} className="flex justify-center items-center group cursor-pointer">
                             <span>{new URL(props.data.url).host}</span>
