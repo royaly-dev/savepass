@@ -24,7 +24,7 @@ export default function PasswordCard(props: { data: PasswordData, requestEdit(da
             <CardContent className="flex justify-between items-center gap-2 px-0">
                 <div className="flex justify-center items-center gap-2">
                     {errorLoadingImage
-                        ? <Globe size={24} color="#169c92" className="p-3 box-content bg-[#aeddd9] rounded-md"/>
+                        ? <Globe size={24} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md"/>
                         : <div className="p-3 box-content rounded-md relative overflow-hidden">
                             <img style={{height: 24, width: 24, borderRadius: "100%"}} src={"https://"+(new URL(props.data.url).hostname)+"/favicon.ico"} onError={() => {setErrorLoadingImage(true)}} className="z-10 relative" />
                             <img src={"https://"+(new URL(props.data.url).hostname)+"/favicon.ico"} onError={() => {setErrorLoadingImage(true)}} className="absolute w-full top-0 left-0 z-0 rounded-md blur-md" />

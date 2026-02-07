@@ -23,6 +23,18 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
 
     const [password, setPassword] = useState<PasswordData>({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
     const [tempNewMailValue, setTempNewMailValue] = useState<string>(null)
+    const [isReady, setIsReady] = useState(false)
+
+    useEffect(() => {
+        if (props.requestPassword) {
+            const timer = setTimeout(() => {
+                setIsReady(true)
+            }, 180) // remove the bug where the modal instently close in modify mode (because the modal is set to false)
+            return () => clearTimeout(timer)
+        } else {
+            setIsReady(false)
+        }
+    }, [props.requestPassword])
 
     useEffect(() => {
         if(props?.updateData?.id) {
@@ -61,7 +73,7 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
     const existingMails = [...new Set(props?.data?.password?.map(p => p.mail).filter(Boolean)), (tempNewMailValue != null && tempNewMailValue)]
 
     return (
-        <Dialog modal={false} open={props.requestPassword} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})}} >
+        <Dialog modal={false} open={props.requestPassword && isReady} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})}} >
             <DialogContent className="w-fit">
                 <DialogHeader>
                     <DialogTitle>{props.type == "add" ? "Add a new Password" : "Modify your password"}</DialogTitle>

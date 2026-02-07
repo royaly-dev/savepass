@@ -24,5 +24,13 @@ contextBridge.exposeInMainWorld('savepass', {
   },
   copyToClipBoard: (text: string) => {
     ipcRenderer.send("copyToClipBoard", text)
+  },
+  genrateOPT: async () => {
+    return await ipcRenderer.invoke("getTotp")
+  },
+  onGetOTP: (callback: any) => {
+    ipcRenderer.on('otpGen', (event, data) => {
+      callback(data)
+    })
   }
 })

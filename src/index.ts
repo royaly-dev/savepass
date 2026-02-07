@@ -2,6 +2,8 @@ import { app, BrowserWindow, clipboard, ipcMain, session, shell } from 'electron
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
+import { getRemainingTime } from "@otplib/totp";
+import { OptData } from './types/Data';
 
 const store: any = new Store();
 
@@ -20,8 +22,33 @@ const createWindow = (): void => {
     },
   });
 
+  mainWindow.webContents.once("dom-ready", async () => {
+    genTotptimeout(0)
+  })
+
+  function genTotptimeout(time: number) {
+    setTimeout( async () => {
+      if (master != "") {
+        const data = await genTotp()
+        mainWindow.webContents.send('otpGen', data)
+        genTotptimeout(data.left)
+      } else {
+        genTotptimeout(getRemainingTime())
+      }
+    }, time*1000);
+  }
+
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 };
+
+async function genTotp() {
+  const timeleft = getRemainingTime()
+  const savedData = <OptData[]>JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)).opt
+  for (let i = 0; i < savedData.length; i++) {
+    savedData[i].key = await generate({secret: savedData[i].key})
+  }
+  return {left: timeleft, data: savedData}
+}
 
 app.on('ready', () => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -32,7 +59,8 @@ app.on('ready', () => {
           `
           default-src 'self';
           script-src 'self' 'unsafe-eval';
-          style-src 'self' 'unsafe-inline';
+          style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+          font-src 'self' https://fonts.gstatic.com;
           img-src 'self' data: https:;
           connect-src 'self' ws: http:;
           `
@@ -55,6 +83,10 @@ ipcMain.handle("IsRegister", async () => {
     } else {
       return true
     }
+})
+
+ipcMain.handle("getTotp", async () => {
+  return await genTotp()
 })
 
 ipcMain.handle("Register", async (event, data) => {
