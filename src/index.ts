@@ -1,9 +1,10 @@
-import { app, BrowserWindow, clipboard, ipcMain, session, shell } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
 import { getRemainingTime } from "@otplib/totp";
-import { OptData } from './types/Data';
+import { Data, OptData, PasswordData } from './types/Data';
+import fs from 'fs'
 
 const store: any = new Store();
 
@@ -133,6 +134,62 @@ ipcMain.on("SaveData", (event, data) => {
   }
 
   store.set('data', CryptoJS.AES.encrypt(JSON.stringify(data), master).toString())
+})
+
+ipcMain.handle("ImportData", async () => {
+  const data = await dialog.showOpenDialog({properties: ['openFile'], filters: [{name: 'JSON', extensions: ['json']}]})
+  if (data.canceled) {
+    console.log("canceled")
+    return {canceled: true}
+  }
+  let canceled = false
+  fs.readFile(data.filePaths[0], 'utf8', async (err: any, data: string) => {
+    if (err) {
+      canceled = true
+      return
+    }
+    const newData: Data = await JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
+    const parsedData: Data = JSON.parse(data)
+    console.log(newData)
+
+    for (const password of parsedData.password) {
+      if (!newData.password.some(p => p.id === password.id)) {
+        newData.password.push(password)
+      }
+    }
+
+    for (const totp of parsedData.opt) {
+      if (!newData.opt.some(o => o.id === totp.id)) {
+        newData.opt.push(totp)
+      }
+    }
+
+    console.log(parsedData)
+    console.log(newData)
+
+    store.set('data', CryptoJS.AES.encrypt(JSON.stringify(newData), master).toString())
+
+  })
+  return {canceled: canceled}
+})
+
+ipcMain.handle("ExportData", async () => {
+  const data = await dialog.showOpenDialog({properties: ['openDirectory']})
+  
+  if (data.canceled) {
+    console.log("canceled")
+    return {canceled: true}
+  }
+
+  let canceled = false
+  fs.writeFile(data.filePaths[0]+"/SavePassData.json", CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8), (err: any) => {
+    if (err) {
+      canceled = true
+      return
+    }
+  })
+
+  return {canceled: canceled}
 })
 
 app.on('activate', () => {

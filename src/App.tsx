@@ -90,6 +90,25 @@ function Homepage() {
     refreshOPT()
   }
 
+  const ImportData = async () => {
+    const iscanceled: {canceled: boolean} = await (window as any).savepass.ImportData()
+    if (iscanceled.canceled) {
+      alert("error")
+    } else {
+      refreshOPT()
+      alert("succes")
+    }
+  }
+
+  const ExportData = async () => {
+    const iscanceled: {canceled: boolean} = await (window as any).savepass.ExportData()
+    if (iscanceled.canceled) {
+      alert("error")
+    } else {
+      alert("succes")
+    }
+  }
+
   if (!confirm) {
     return (
       <><MasterPasswordCheck confirmCheck={() => {setConfirm(true)}} />
@@ -115,7 +134,7 @@ function Homepage() {
                 {
                   data?.password && data?.password.length != 0
                   ? data.password.map((item) => {
-                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id, accountid: item.accountid, password: item.password, url: item.url, mail: item.mail}}/>
+                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id,password: item.password, url: item.url, mail: item.mail}}/>
                   })
                   : <div className='flex justify-center items-center flex-col'>
                     <h3 className='text-xl text-muted-foreground'>No password saved</h3>
@@ -140,7 +159,22 @@ function Homepage() {
               </div>
             </div>
           </CarouselItem>
-          <CarouselItem><p className='h-screen text-center'>settings</p></CarouselItem>
+          <CarouselItem>
+            <div className='h-screen py-4 flex items-start flex-col'>
+                  <div>
+                    <Button onClick={() => {ImportData()}} variant='default'>Import</Button>
+                    <Button onClick={() => {ExportData()}} variant='default'>Export</Button>
+                  </div>
+                  <div>
+                    <Button variant='default'>Setup Sync</Button>
+                    <div>
+                      <p>Status : <span>enable</span></p>
+                      <p>Last sycn : <span>1 day</span></p>
+                      <p>connected device : <span>1</span></p>
+                    </div>
+                  </div>
+            </div>
+          </CarouselItem>
         </CarouselContent>
       </Carousel>
     </main>

@@ -32,5 +32,11 @@ contextBridge.exposeInMainWorld('savepass', {
     ipcRenderer.on('otpGen', (event, data) => {
       callback(data)
     })
+  },
+  ImportData: async () => {
+    return await ipcRenderer.invoke("ImportData")
+  },
+  ExportData: async () => {
+    return await ipcRenderer.invoke("ExportData")
   }
 })

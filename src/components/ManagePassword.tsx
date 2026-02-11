@@ -21,7 +21,7 @@ import { toast } from "sonner"
 
 export default function ManagePassword(props: {data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void} ) {
 
-    const [password, setPassword] = useState<PasswordData>({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
+    const [password, setPassword] = useState<PasswordData>({id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
     const [tempNewMailValue, setTempNewMailValue] = useState<string>(null)
     const [isReady, setIsReady] = useState(false)
 
@@ -62,7 +62,7 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
             if (new URL(password.url).hostname) {
                 (window as any).savepass.SaveData(newdata)
                 props.openChange()
-                setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
+                setPassword({id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})
             }
             setTempNewMailValue(null)
         } catch (error) {
@@ -73,7 +73,7 @@ export default function ManagePassword(props: {data: Data, updateData?: Password
     const existingMails = [...new Set(props?.data?.password?.map(p => p.mail).filter(Boolean)), (tempNewMailValue != null && tempNewMailValue)]
 
     return (
-        <Dialog modal={false} open={props.requestPassword && isReady} onOpenChange={() => {props.openChange(); setPassword({accountid: "", id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})}} >
+        <Dialog modal={false} open={props.requestPassword && isReady} onOpenChange={() => {props.openChange(); setPassword({id: (crypto as any).randomUUID(), password: "", url: "", mail: ""})}} >
             <DialogContent className="w-fit">
                 <DialogHeader>
                     <DialogTitle>{props.type == "add" ? "Add a new Password" : "Modify your password"}</DialogTitle>
