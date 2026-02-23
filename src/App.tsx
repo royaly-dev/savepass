@@ -79,7 +79,7 @@ function Homepage() {
   }
 
   const RequestPasswordDeletion = async (dataDeletion: PasswordData) => {
-    (window as any).savepass.SaveData({...data, password: data.password.filter(item => item.id != dataDeletion.id)})
+    (window as any).savepass.SaveData({...data, password: data.password.map(item => item.id == dataDeletion.id ? {...item, deleted: true} : item)})
     refresh()
   }
 
@@ -134,7 +134,8 @@ function Homepage() {
                 {
                   data?.password && data?.password.length != 0
                   ? data.password.map((item) => {
-                    return <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={{id: item.id,password: item.password, url: item.url, mail: item.mail}}/>
+                    console.log(item)
+                    return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item}/>
                   })
                   : <div className='flex justify-center items-center flex-col'>
                     <h3 className='text-xl text-muted-foreground'>No password saved</h3>
