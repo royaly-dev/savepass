@@ -38,5 +38,13 @@ contextBridge.exposeInMainWorld('savepass', {
   },
   ExportData: async () => {
     return await ipcRenderer.invoke("ExportData")
+  },
+  SyncSetup: async (type: string) => {
+    return await ipcRenderer.invoke("SyncSetup", type)
+  },
+  syncRefresh: (callback: any) => {
+    ipcRenderer.on("syncRefresh", () => {
+      callback()
+    })
   }
 })
