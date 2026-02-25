@@ -1,6 +1,6 @@
 import { ArrowUpRight, Copy, EllipsisVertical, Eye, EyeOff, Globe } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
-import { AccountData, OptData, PasswordData } from "@/types/Data";
+import { OptData, PasswordData } from "@/types/Data";
 import { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { toast } from "sonner";

@@ -244,6 +244,10 @@ ipcMain.handle("ExportData", async () => {
   return { canceled: canceled }
 })
 
+ipcMain.handle("GetSyncStatus", async () => {
+  return await JSON.parse(store.get("sync"))
+})
+
 ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
     const newDevice = instance.find({ type: 'http' })

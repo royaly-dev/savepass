@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron"
-import { Data } from "@/types/Data"
+import { Data, syncData } from "@/types/Data"
 
 const { contextBridge } = require('electron')
 
@@ -39,8 +39,14 @@ contextBridge.exposeInMainWorld('savepass', {
   ExportData: async () => {
     return await ipcRenderer.invoke("ExportData")
   },
+  GetSyncStatus: async () => {
+    return await ipcRenderer.invoke("GetSyncStatus")
+  },
   SyncSetup: async (type: string) => {
     return await ipcRenderer.invoke("SyncSetup", type)
+  },
+  addSyncDevice: async (data: { newdevice: syncData, ip: string }) => {
+    return await ipcRenderer.invoke("addSyncDevice", data)
   },
   syncRefresh: (callback: any) => {
     ipcRenderer.on("syncRefresh", () => {

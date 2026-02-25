@@ -4,12 +4,13 @@ import MasterPasswordSetup from '@/components/MasterPasswordSetup';
 import MasterPasswordCheck from '@/components/MasterPasswordCheck';
 import { KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { Data, OptData, PasswordData } from '@/types/Data';
+import { Data, OptData, PasswordData, syncData, syncDevice } from '@/types/Data';
 import { Button } from './components/ui/button';
 import PasswordCard from './components/passwordCard';
 import ManagePassword from './components/ManagePassword';
 import OptCodeCard from './components/OptCodeCard';
 import ManageTotp from './components/ManageTOTP';
+import { toast } from 'sonner';
 
 function Homepage() {
 
@@ -23,6 +24,8 @@ function Homepage() {
   const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData>(null)
   const [optCode, setOptCode] = useState<OptData[]>()
   const [optCodeLeft, setOptCodeLeft] = useState<number>(0)
+  const [syncDeviceData, setSyncDeviceData] = useState<syncDevice>(null)
+  const [syncDeviceModal, setSyncDeviceModal] = useState<{open: boolean, type: number, data: syncData[]}>(null)
 
   useEffect(() => {
     if (!carouselApi) {
@@ -36,10 +39,16 @@ function Homepage() {
       setOptCode(data.data)
       setOptCodeLeft(data.left)
       refresh()
-      console.log("Ressus : " + data.data)
+      console.log("Ressus : " + data.data)  
       console.log("left : " + data.left)
+    });
+
+    (window as any).savepass.syncRefresh(() => {
+      toast.success("Successfully synced with another device !")
+      refreshOPT()
     })
 
+    GetSyncStatus()
     refreshOPT()
     refresh()
   }, [carouselApi, currentSection])
@@ -109,6 +118,18 @@ function Homepage() {
     }
   }
 
+  const GetSyncStatus = async () => {
+    setSyncDeviceData(await (window as any).savepass.GetSyncStatus())
+  }
+
+  const SyncSetup = async (type: string) => {
+    return await (window as any).savepass.SyncSetup(type)
+  }
+
+  const addSyncDevice = async (data: { newdevice: syncData, ip: string }) => {
+    return await (window as any).savepass.addSyncDevice(data)
+  }
+
   if (!confirm) {
     return (
       <><MasterPasswordCheck confirmCheck={() => { setConfirm(true) }} />
@@ -166,11 +187,14 @@ function Homepage() {
                 <Button onClick={() => { ExportData() }} variant='default'>Export</Button>
               </div>
               <div>
-                <Button variant='default' onClick={async () => { console.log(await (window as any).savepass.SyncSetup("test")) }}>Setup Sync</Button>
+                <Button variant='default' onClick={async () => {
+                  setSyncDeviceModal({open: true, data: syncDeviceData?.data, type: syncDeviceData?.status ? 0 : 1})
+                }}>{syncDeviceData?.status ? "Manage Sync" : "Setup Sync"}</Button>
+                {JSON.stringify(syncDeviceModal)}
                 <div>
-                  <p>Status : <span>enable</span></p>
-                  <p>Last sycn : <span>1 day</span></p>
-                  <p>connected device : <span>1</span></p>
+                  <p>Status : <span>{syncDeviceData?.status ? "Enabled" : "Disabled"}</span></p>
+                  <p>Last sycn : <span>{new Date(syncDeviceData?.lastSync).toLocaleDateString()}</span></p>
+                  <p>connected device : <span>{syncDeviceData?.data.length}</span></p>
                 </div>
               </div>
             </div>
