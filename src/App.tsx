@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import MasterPasswordSetup from '@/components/MasterPasswordSetup';
 import MasterPasswordCheck from '@/components/MasterPasswordCheck';
-import { KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
+import { Check, KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Data, OptData, PasswordData, syncData, syncDevice } from '@/types/Data';
 import { Button } from './components/ui/button';
@@ -11,6 +11,8 @@ import ManagePassword from './components/ManagePassword';
 import OptCodeCard from './components/OptCodeCard';
 import ManageTotp from './components/ManageTOTP';
 import { toast } from 'sonner';
+import { Service } from 'bonjour-service';
+import SyncModal from './components/syncModal';
 
 function Homepage() {
 
@@ -24,8 +26,6 @@ function Homepage() {
   const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData>(null)
   const [optCode, setOptCode] = useState<OptData[]>()
   const [optCodeLeft, setOptCodeLeft] = useState<number>(0)
-  const [syncDeviceData, setSyncDeviceData] = useState<syncDevice>(null)
-  const [syncDeviceModal, setSyncDeviceModal] = useState<{open: boolean, type: number, data: syncData[]}>(null)
 
   useEffect(() => {
     if (!carouselApi) {
@@ -39,7 +39,7 @@ function Homepage() {
       setOptCode(data.data)
       setOptCodeLeft(data.left)
       refresh()
-      console.log("Ressus : " + data.data)  
+      console.log("Ressus : " + data.data)
       console.log("left : " + data.left)
     });
 
@@ -48,7 +48,6 @@ function Homepage() {
       refreshOPT()
     })
 
-    GetSyncStatus()
     refreshOPT()
     refresh()
   }, [carouselApi, currentSection])
@@ -118,18 +117,6 @@ function Homepage() {
     }
   }
 
-  const GetSyncStatus = async () => {
-    setSyncDeviceData(await (window as any).savepass.GetSyncStatus())
-  }
-
-  const SyncSetup = async (type: string) => {
-    return await (window as any).savepass.SyncSetup(type)
-  }
-
-  const addSyncDevice = async (data: { newdevice: syncData, ip: string }) => {
-    return await (window as any).savepass.addSyncDevice(data)
-  }
-
   if (!confirm) {
     return (
       <><MasterPasswordCheck confirmCheck={() => { setConfirm(true) }} />
@@ -146,7 +133,7 @@ function Homepage() {
         <RectangleEllipsis color={currentSection == "opt" ? '#fff' : '#000'} size={24} onClick={() => { setCurrentSection("opt") }} className={'p-1 py-1.5 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "opt" ? 'bg-foreground' : '')} />
         <Settings size={24} color={currentSection == "settings" ? '#fff' : '#000'} onClick={() => { setCurrentSection("settings") }} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "settings" ? 'bg-foreground' : '')} />
       </nav>
-      <Carousel setApi={setCarouselApi} orientation='vertical' className='h-screen col-end-10 col-start-3'>
+      <Carousel setApi={setCarouselApi} opts={{ watchDrag: false }} orientation='vertical' className='h-screen col-end-10 col-start-3'>
         <CarouselContent className='max-h-screen'>
           <CarouselItem>
             <div className='h-screen py-4 flex items-start flex-col'>
@@ -181,27 +168,11 @@ function Homepage() {
             </div>
           </CarouselItem>
           <CarouselItem>
-            <div className='h-screen py-4 flex items-start flex-col'>
-              <div>
-                <Button onClick={() => { ImportData() }} variant='default'>Import</Button>
-                <Button onClick={() => { ExportData() }} variant='default'>Export</Button>
-              </div>
-              <div>
-                <Button variant='default' onClick={async () => {
-                  setSyncDeviceModal({open: true, data: syncDeviceData?.data, type: syncDeviceData?.status ? 0 : 1})
-                }}>{syncDeviceData?.status ? "Manage Sync" : "Setup Sync"}</Button>
-                {JSON.stringify(syncDeviceModal)}
-                <div>
-                  <p>Status : <span>{syncDeviceData?.status ? "Enabled" : "Disabled"}</span></p>
-                  <p>Last sycn : <span>{new Date(syncDeviceData?.lastSync).toLocaleDateString()}</span></p>
-                  <p>connected device : <span>{syncDeviceData?.data.length}</span></p>
-                </div>
-              </div>
-            </div>
+            <SyncModal ImportData={ImportData} ExportData={ExportData} />
           </CarouselItem>
         </CarouselContent>
       </Carousel>
-    </main>
+    </main >
   );
 }
 

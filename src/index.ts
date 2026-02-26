@@ -257,7 +257,7 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
         resolve(newDevice.services)
       }, 3000);
     })
-    return Services.map((service) => Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 ? service : {})
+    return Services.map((service) => Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service)
   } else {
     instance.publish({ name: hostname() + "-savepass-" + syncKey, type: 'http', port: 3600 })
     console.log(syncKey)
@@ -269,14 +269,41 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
 ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: string }) => {
   const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
   SyncDevice.data.push(data.newdevice)
+  SyncDevice.lastSync = Date.now()
+  SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
-  await fetch("http://" + data.ip + "/setupSync", {
+  fetch("http://" + data.ip + ":5263/setupSync", {
     method: 'POST',
     body: JSON.stringify({
       syncKey: syncKey,
       name: hostname()
     })
   })
+  return { confirm: true }
+})
+
+ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
+  const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
+  SyncDevice.data = SyncDevice.data.filter(item => item.syncKey !== data.syncKey)
+  SyncDevice.lastSync = Date.now()
+  SyncDevice.status = SyncDevice.data.length > 0
+  await store.set("sync", JSON.stringify(SyncDevice))
+  const newDevice = instance.find({ type: 'http' })
+  const Services: Service[] = await new Promise((resolve) => {
+    setTimeout(() => {
+      newDevice.stop()
+      resolve(newDevice.services)
+    }, 1000);
+  })
+  const t = Services.filter(item => item.name.split("-")[item.name.split("-").length - 1] === data.syncKey)
+  if (t[0]?.addresses[0]) {
+    fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
+      method: 'POST',
+      body: JSON.stringify({
+        syncKey: syncKey
+      })
+    })
+  }
   return { confirm: true }
 })
 
@@ -300,11 +327,17 @@ const webserver = async () => {
 
       req.on("end", async () => {
         if (isWaiting) {
-          console.log("adding new device")
+
           const parsedbody = JSON.parse(body)
           const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
           SyncDevice.data.push({ lastSync: Date.now(), name: parsedbody.name, syncKey: parsedbody.syncKey })
+          SyncDevice.lastSync = Date.now()
+          SyncDevice.status = SyncDevice.data.length > 0
+
           await store.set("sync", JSON.stringify(SyncDevice))
+          ipcMain.emit("syncFinished")
+          instance.unpublishAll()
+
           isWaiting = false
           res.statusCode = 200
           res.end("")
@@ -397,12 +430,15 @@ const webserver = async () => {
 
         await store.set("sync", JSON.stringify(syncData))
 
-        res.end(200)
+        ipcMain.emit("syncFinished")
+
+        res.statusCode = 200
+        res.end("")
       })
     }
   })
   server.listen(5263, '0.0.0.0', () => {
-    console.log(`Serveur démarré`);
+    console.log(`Server started`);
   });
 }
 webserver()

@@ -48,6 +48,9 @@ contextBridge.exposeInMainWorld('savepass', {
   addSyncDevice: async (data: { newdevice: syncData, ip: string }) => {
     return await ipcRenderer.invoke("addSyncDevice", data)
   },
+  removeSyncDevice: async (data: syncData) => {
+    return await ipcRenderer.invoke("removeSyncDevice", data)
+  },
   syncRefresh: (callback: any) => {
     ipcRenderer.on("syncRefresh", () => {
       callback()
