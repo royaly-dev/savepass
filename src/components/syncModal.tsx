@@ -78,7 +78,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
     }
 
     return (
-        <div className='h-screen py-4 flex items-start flex-col'>
+        <div className='h-screen py-4 flex items-start flex-col max-w-full'>
             <Dialog onOpenChange={() => { setSyncDeviceModal({ open: false, data: [], type: 0 }) }} open={syncDeviceModal.open}>
                 <DialogContent>
                     <DialogHeader>
@@ -86,8 +86,8 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                     </DialogHeader>
                     <Carousel className="min-w-0" setApi={setCarouselApiModal} opts={{ watchDrag: false, startIndex: syncDeviceModal.type }}>
                         <CarouselContent>
-                            <CarouselItem className="flex justify-center items-center flex-col gap-2.5">
-                                <Button variant='default' className='self-end' disabled={syncModalPairMode === null} onClick={() => { next() }}>Add a Device</Button>
+                            <CarouselItem className="flex justify-start items-center flex-col gap-2.5">
+                                <Button variant='default' className='self-end mt-2.5' onClick={() => { next() }}>Add a Device</Button>
                                 {
                                     syncDeviceData?.data && syncDeviceData.data.map((item) => (
                                         <DeviceCard name={item.name} type='remove' request={() => { removeSyncDevice(item) }} />
@@ -122,16 +122,18 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                                 <Button variant='default' className='self-end' disabled={syncModalPairMode === null} onClick={() => { next() }}>Next</Button>
                             </CarouselItem>
                             <CarouselItem>
-                                <Button onClick={() => { setFoundDevices(null); SyncSetup("add").then((value: Service[]) => { setFoundDevices(value.filter(item => typeof item === "object")) }) }}>refresh</Button>
-                                {
-                                    foundDevices === null
-                                        ? <p>Searcing...</p>
-                                        : foundDevices.length === 0
-                                            ? <p>No device found</p>
-                                            : foundDevices.map((item) => {
-                                                return item.name && <DeviceCard key={item.name.split("-")[item.name.split("-").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: item.addresses[0], newdevice: { syncKey: item.name.split("-")[item.name.split("-").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
-                                            })
-                                }
+                                <Button className="my-2.5" onClick={() => { setFoundDevices(null); SyncSetup("add").then((value: Service[]) => { setFoundDevices(value.filter(item => typeof item === "object")) }) }}>refresh</Button>
+                                <div className="flex justify-center items-center flex-col gap-2.5">
+                                    {
+                                        foundDevices === null
+                                            ? <h3 className='text-xl text-muted-foreground'>Searching...</h3>
+                                            : foundDevices.length === 0
+                                                ? <h3 className='text-xl text-muted-foreground'>No device found</h3>
+                                                : foundDevices.map((item) => {
+                                                    return item.name && <DeviceCard key={item.name.split("-")[item.name.split("-").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: item.addresses[0], newdevice: { syncKey: item.name.split("-")[item.name.split("-").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
+                                                })
+                                    }
+                                </div>
                             </CarouselItem>
                             <CarouselItem className='flex justify-center items-center flex-col gap-4'>
                                 <Check size={64} color='#fff' className='rounded-full p-2 bg-green-500' />
@@ -141,19 +143,18 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                     </Carousel>
                 </DialogContent>
             </Dialog>
-            <div>
-                <Button onClick={() => { ImportData() }} variant='default'>Import</Button>
-                <Button onClick={() => { ExportData() }} variant='default'>Export</Button>
+            <div className="flex justify-center items-center gap-6 max-w-full w-full my-6">
+                <Button className="flex-1 cursor-pointer text-lg" onClick={() => { ImportData() }} variant='default'>Import</Button>
+                <Button className="flex-1 cursor-pointer text-lg" onClick={() => { ExportData() }} variant='default'>Export</Button>
             </div>
-            <div>
-                <Button variant='default' onClick={async () => {
+            <div className="flex justify-center items-center flex-col w-full">
+                <Button className="w-full cursor-pointer mb-6 text-lg" variant='default' onClick={async () => {
                     setSyncDeviceModal({ open: true, data: syncDeviceData?.data, type: syncDeviceData?.status ? 0 : 1 })
                 }}>{syncDeviceData?.status ? "Manage Sync" : "Setup Sync"}</Button>
-                {JSON.stringify(syncDeviceModal)}
-                <div>
-                    <p>Status : <span>{syncDeviceData?.status ? "Enabled" : "Disabled"}</span></p>
-                    <p>Last sycn : <span>{new Date(syncDeviceData?.lastSync).toLocaleDateString()}</span></p>
-                    <p>connected device : <span>{syncDeviceData?.data.length}</span></p>
+                <div className="flex justify-start items-start flex-col w-full">
+                    <p className="text-base">Status : <span>{syncDeviceData?.status ? "Enabled" : "Disabled"}</span></p>
+                    <p className="text-base">Last sycn : <span>{new Date(syncDeviceData?.lastSync).toLocaleDateString()}</span></p>
+                    <p className="text-base">connected device : <span>{syncDeviceData?.data.length}</span></p>
                 </div>
             </div>
         </div >

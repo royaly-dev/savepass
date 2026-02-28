@@ -14,7 +14,7 @@ export default function DeviceCard({ name, type, request }: { name: string, type
             </div>
             <Button
                 variant={type == "add" ? "default" : "destructive"}
-                className={`shrink-0 ${type == "add" ? "bg-green-600" : ""}`}
+                className={`cursor-pointer ${type == "add" ? "bg-green-600" : ""}`}
                 onClick={() => request("id")}
             >
                 {type == "add" ? "+" : "x"}

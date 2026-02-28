@@ -12,7 +12,10 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 import { networkInterfaces } from 'node:os';
 
 const store: any = new Store();
-const instance = new Bonjour()
+const instance = new Bonjour({}, (err: any) => {
+  console.log("error")
+  console.log(err)
+})
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -250,16 +253,18 @@ ipcMain.handle("GetSyncStatus", async () => {
 
 ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
-    const newDevice = instance.find({ type: 'http' })
+    const newDevice = instance.find({ type: 'http' });
     const Services: Service[] = await new Promise((resolve) => {
       setTimeout(() => {
         newDevice.stop()
         resolve(newDevice.services)
       }, 3000);
     })
-    return Services.map((service) => Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service)
+    console.log(Services)
+    return Services.map((service) => Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && service)
   } else {
-    instance.publish({ name: hostname() + "-savepass-" + syncKey, type: 'http', port: 3600 })
+    const host = await (hostname().slice(0,17) + "-savepass-" + syncKey)
+    instance.publish({ name: host, type: 'http', port: 3600 });
     console.log(syncKey)
     isWaiting = true
     return { confirm: true }
@@ -336,6 +341,7 @@ const webserver = async () => {
 
           await store.set("sync", JSON.stringify(SyncDevice))
           ipcMain.emit("syncFinished")
+          console.log("setup finished")
           instance.unpublishAll()
 
           isWaiting = false

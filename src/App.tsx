@@ -67,6 +67,8 @@ function Homepage() {
 
   const refresh = async () => {
     const data: Data = await (window as any).savepass.GetData()
+    data.password = data.password.filter(item => !item.deleted)
+    data.opt = data.opt.filter(item => !item.deleted)
     setData(data)
     setTypeAddingPassword("add")
     setUpdatePasswordData(null)
@@ -101,19 +103,19 @@ function Homepage() {
   const ImportData = async () => {
     const iscanceled: { canceled: boolean } = await (window as any).savepass.ImportData()
     if (iscanceled.canceled) {
-      alert("error")
+      toast.error("Error while trying to import data")
     } else {
       refreshOPT()
-      alert("succes")
+      toast.success("Successfuly imported your password and Totp code !")
     }
   }
 
   const ExportData = async () => {
     const iscanceled: { canceled: boolean } = await (window as any).savepass.ExportData()
     if (iscanceled.canceled) {
-      alert("error")
+      toast.error("Error while trying to export data")
     } else {
-      alert("succes")
+      toast.success("Successfuly exported your password and Totp code !")
     }
   }
 
