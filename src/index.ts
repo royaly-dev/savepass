@@ -23,6 +23,14 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 let master = ""
 let syncKey = ""
 let isWaiting = false
+const Services: Service[] = []
+
+const mainInstance = instance.find({ type: "http" }, (service: Service) => {
+  console.log("Detected a service")
+  if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass")) {
+    Services.push(service)
+  }
+})
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
@@ -253,17 +261,10 @@ ipcMain.handle("GetSyncStatus", async () => {
 
 ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
-    const newDevice = instance.find({ type: 'http' });
-    const Services: Service[] = await new Promise((resolve) => {
-      setTimeout(() => {
-        newDevice.stop()
-        resolve(newDevice.services)
-      }, 3000);
-    })
     console.log(Services)
-    return Services.map((service) => Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && service)
+    return Services
   } else {
-    const host = await (hostname().slice(0,17) + "-savepass-" + syncKey)
+    const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
     instance.publish({ name: host, type: 'http', port: 3600 });
     console.log(syncKey)
     isWaiting = true
@@ -293,15 +294,9 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   SyncDevice.lastSync = Date.now()
   SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
-  const newDevice = instance.find({ type: 'http' })
-  const Services: Service[] = await new Promise((resolve) => {
-    setTimeout(() => {
-      newDevice.stop()
-      resolve(newDevice.services)
-    }, 1000);
-  })
   const t = Services.filter(item => item.name.split("-")[item.name.split("-").length - 1] === data.syncKey)
   if (t[0]?.addresses[0]) {
+    console.log(t[0]?.addresses[0])
     fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
       method: 'POST',
       body: JSON.stringify({
