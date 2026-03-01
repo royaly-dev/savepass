@@ -406,7 +406,7 @@ const webserver = async () => {
           res.end(JSON.stringify({ data: tempSyncData, confirm: true }))
         } else {
           res.statusCode = 400
-          res.end("")
+          res.end(JSON.stringify({ confirm: false }))
         }
 
       })
