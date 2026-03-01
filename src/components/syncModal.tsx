@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { Service } from "bonjour-service";
 import { Button } from "./ui/button";
 import { Check } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SyncModal({ ImportData, ExportData }: { ImportData(): void, ExportData(): void }) {
 
@@ -38,6 +39,11 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
         if (!syncDeviceModal.open) {
             setFoundDevices([]);
         }
+
+        (window as any).savepass.syncRefresh(async () => {
+            toast.success("Successfully synced with another device !")
+            setSyncDeviceData(await (window as any).savepass.GetSyncStatus())
+        })
 
         GetSyncStatus()
     }, [syncDeviceModal.open]);

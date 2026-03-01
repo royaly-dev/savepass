@@ -12,10 +12,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 import { networkInterfaces } from 'node:os';
 
 const store: any = new Store();
-const instance = new Bonjour({}, (err: any) => {
-  console.log("error")
-  console.log(err)
-})
+const instance = new Bonjour({})
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -213,7 +210,6 @@ ipcMain.handle("ImportData", async () => {
     }
     const newData: Data = await JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
     const parsedData: Data = JSON.parse(data)
-    console.log(newData)
 
     for (const password of parsedData.password) {
       if (!newData.password.some(p => p.id === password.id)) {
@@ -226,9 +222,6 @@ ipcMain.handle("ImportData", async () => {
         newData.opt.push(totp)
       }
     }
-
-    console.log(parsedData)
-    console.log(newData)
 
     store.set('data', CryptoJS.AES.encrypt(JSON.stringify(newData), master).toString())
 
@@ -261,12 +254,10 @@ ipcMain.handle("GetSyncStatus", async () => {
 
 ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
-    console.log(Services)
     return Services
   } else {
     const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
     instance.publish({ name: host, type: 'http', port: 3600 });
-    console.log(syncKey)
     isWaiting = true
     return { confirm: true }
   }
@@ -274,9 +265,14 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
 
 ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: string }) => {
   const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
+
   SyncDevice.data.push(data.newdevice)
   SyncDevice.lastSync = Date.now()
   SyncDevice.status = SyncDevice.data.length > 0
+
+  Services.slice(0, Services.length)
+  Services.push(...Services.filter(item => item.host !== data.newdevice.name))
+
   await store.set("sync", JSON.stringify(SyncDevice))
   fetch("http://" + data.ip + ":5263/setupSync", {
     method: 'POST',
@@ -296,7 +292,6 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   await store.set("sync", JSON.stringify(SyncDevice))
   const t = Services.filter(item => item.name.split("-")[item.name.split("-").length - 1] === data.syncKey)
   if (t[0]?.addresses[0]) {
-    console.log(t[0]?.addresses[0])
     fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
       method: 'POST',
       body: JSON.stringify({
@@ -425,10 +420,9 @@ const webserver = async () => {
 
         const syncData: syncDevice = JSON.parse(store.get("sync"))
 
-        syncData.data = syncData.data.filter(item => item.syncKey === body.syncKey)
+        syncData.data = syncData.data.filter(item => item.syncKey !== body.syncKey)
         syncData.lastSync = Date.now()
         syncData.status = syncData.data.length > 0
-
         await store.set("sync", JSON.stringify(syncData))
 
         ipcMain.emit("syncFinished")
