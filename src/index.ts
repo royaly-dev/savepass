@@ -94,6 +94,8 @@ app.on('ready', () => {
 
 const startSync = async () => {
   console.log("Starting to sync with all device...")
+  const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
+  instance.publish({ name: host, type: 'http', port: 3600 });
   const DeviceScan = instance.find({ type: 'http' })
   await new Promise((resolve) => {
     setTimeout(() => {
@@ -107,7 +109,7 @@ const startSync = async () => {
   for (const device of SyncDeviceData.data) {
     for (const scanedDevice of DeviceScan.services) {
       if (scanedDevice.name.includes(device.syncKey)) {
-        const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + "/syncData", {
+        const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
             syncKey: syncKey,
@@ -401,7 +403,7 @@ const webserver = async () => {
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
           //TODO : encrypt data with the device syncKey to prevent hack
-          res.end(JSON.stringify(tempSyncData))
+          res.end(JSON.stringify({ data: tempSyncData, confirm: true }))
         } else {
           res.statusCode = 400
           res.end("")
