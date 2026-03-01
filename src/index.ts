@@ -95,7 +95,7 @@ app.on('ready', () => {
 const startSync = async () => {
   console.log("Starting to sync with all device...")
   const DeviceScan = instance.find({ type: 'http' })
-  const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
+  const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
   instance.publish({ name: host, type: 'http', port: 3600 });
   await new Promise((resolve) => {
     setTimeout(() => {
@@ -258,7 +258,7 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
     return Services
   } else {
-    const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
+    const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
     instance.publish({ name: host, type: 'http', port: 3600 });
     isWaiting = true
     return { confirm: true }
@@ -292,7 +292,7 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   SyncDevice.lastSync = Date.now()
   SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
-  const t = Services.filter(item => item.name.split("-")[item.name.split("-").length - 1] === data.syncKey)
+  const t = Services.filter(item => item.name.split("_")[item.name.split("_").length - 1] === data.syncKey)
   if (t[0]?.addresses[0]) {
     fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
       method: 'POST',
