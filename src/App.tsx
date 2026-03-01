@@ -89,7 +89,7 @@ function Homepage() {
   }
 
   const RequestPasswordDeletion = async (dataDeletion: PasswordData) => {
-    (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id == dataDeletion.id ? { ...item, deleted: true } : item) })
+    (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id === dataDeletion.id ? { ...item, deleted: true, lastedit: Date.now() } : item) })
     refresh()
   }
 

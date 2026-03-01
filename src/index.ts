@@ -94,9 +94,9 @@ app.on('ready', () => {
 
 const startSync = async () => {
   console.log("Starting to sync with all device...")
+  const DeviceScan = instance.find({ type: 'http' })
   const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
   instance.publish({ name: host, type: 'http', port: 3600 });
-  const DeviceScan = instance.find({ type: 'http' })
   await new Promise((resolve) => {
     setTimeout(() => {
       DeviceScan.stop()
