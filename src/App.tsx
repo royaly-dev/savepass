@@ -67,8 +67,6 @@ function Homepage() {
 
   const refresh = async () => {
     const data: Data = await (window as any).savepass.GetData()
-    data.password = data.password.filter(item => !item.deleted)
-    data.opt = data.opt.filter(item => !item.deleted)
     setData(data)
     setTypeAddingPassword("add")
     setUpdatePasswordData(null)
@@ -89,7 +87,7 @@ function Homepage() {
   }
 
   const RequestPasswordDeletion = async (dataDeletion: PasswordData) => {
-    (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id == dataDeletion.id ? { ...item, deleted: true } : item) })
+    (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id === dataDeletion.id ? { ...item, deleted: true, lastedit: Date.now() } : item) })
     refresh()
   }
 

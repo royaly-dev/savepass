@@ -136,7 +136,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                                             : foundDevices.length === 0
                                                 ? <h3 className='text-xl text-muted-foreground'>No device found</h3>
                                                 : foundDevices.map((item) => {
-                                                    return item.name && <DeviceCard key={item.name.split("-")[item.name.split("-").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: item.addresses[0], newdevice: { syncKey: item.name.split("-")[item.name.split("-").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
+                                                    return item.name && <DeviceCard key={item.name.split("_")[item.name.split("_").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: item.addresses[0], newdevice: { syncKey: item.name.split("_")[item.name.split("_").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
                                                 })
                                     }
                                 </div>

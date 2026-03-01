@@ -94,9 +94,9 @@ app.on('ready', () => {
 
 const startSync = async () => {
   console.log("Starting to sync with all device...")
-  const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
-  instance.publish({ name: host, type: 'http', port: 3600 });
   const DeviceScan = instance.find({ type: 'http' })
+  const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
+  instance.publish({ name: host, type: 'http', port: 3600 });
   await new Promise((resolve) => {
     setTimeout(() => {
       DeviceScan.stop()
@@ -126,6 +126,8 @@ const startSync = async () => {
       }
     }
   }
+
+  ipcMain.emit("syncFinished")
   console.log("Finished to sync with all device !")
 }
 
@@ -258,7 +260,7 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
   if (type == "add") {
     return Services
   } else {
-    const host = await (hostname().slice(0, 17) + "-savepass-" + syncKey)
+    const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
     instance.publish({ name: host, type: 'http', port: 3600 });
     isWaiting = true
     return { confirm: true }
@@ -292,7 +294,7 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   SyncDevice.lastSync = Date.now()
   SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
-  const t = Services.filter(item => item.name.split("-")[item.name.split("-").length - 1] === data.syncKey)
+  const t = Services.filter(item => item.name.split("_")[item.name.split("_").length - 1] === data.syncKey)
   if (t[0]?.addresses[0]) {
     fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
       method: 'POST',
@@ -356,6 +358,7 @@ const webserver = async () => {
         const syncDeviceData: syncDevice = JSON.parse(store.get("sync"))
         const isInSync = syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0
 
+
         if (isInSync && master != "") {
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
           const syncData: Data = body.data
@@ -367,7 +370,7 @@ const webserver = async () => {
             for (const localPassword of tempSyncData.password) {
               if (password.id === localPassword.id) {
                 if (password.lastedit > localPassword.lastedit) {
-                  const index = tempSyncData.password.findIndex(item => item.id = localPassword.id)
+                  const index = tempSyncData.password.findIndex(item => item.id === localPassword.id)
                   tempSyncData.password[index] = password
                 }
                 insert = true
@@ -384,7 +387,7 @@ const webserver = async () => {
             for (const localTotp of tempSyncData.opt) {
               if (Totp.id === localTotp.id) {
                 if (Totp.deleted != localTotp.deleted) {
-                  const index = tempSyncData.opt.findIndex(item => item.id = localTotp.id)
+                  const index = tempSyncData.opt.findIndex(item => item.id === localTotp.id)
                   tempSyncData.opt[index].deleted = true
                 }
                 insert = true
@@ -406,7 +409,7 @@ const webserver = async () => {
           res.end(JSON.stringify({ data: tempSyncData, confirm: true }))
         } else {
           res.statusCode = 400
-          res.end("")
+          res.end(JSON.stringify({ confirm: false }))
         }
 
       })
