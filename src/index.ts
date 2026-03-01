@@ -126,6 +126,8 @@ const startSync = async () => {
       }
     }
   }
+
+  ipcMain.emit("syncFinished")
   console.log("Finished to sync with all device !")
 }
 
@@ -356,9 +358,6 @@ const webserver = async () => {
         const syncDeviceData: syncDevice = JSON.parse(store.get("sync"))
         const isInSync = syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0
 
-        console.log(body)
-        console.log(syncDeviceData)
-        console.log(isInSync)
 
         if (isInSync && master != "") {
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))

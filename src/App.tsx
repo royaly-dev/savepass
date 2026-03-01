@@ -67,8 +67,6 @@ function Homepage() {
 
   const refresh = async () => {
     const data: Data = await (window as any).savepass.GetData()
-    data.password = data.password.filter(item => !item.deleted)
-    data.opt = data.opt.filter(item => !item.deleted)
     setData(data)
     setTypeAddingPassword("add")
     setUpdatePasswordData(null)
