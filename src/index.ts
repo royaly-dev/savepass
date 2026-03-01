@@ -371,7 +371,7 @@ const webserver = async () => {
             for (const localPassword of tempSyncData.password) {
               if (password.id === localPassword.id) {
                 if (password.lastedit > localPassword.lastedit) {
-                  const index = tempSyncData.password.findIndex(item => item.id = localPassword.id)
+                  const index = tempSyncData.password.findIndex(item => item.id === localPassword.id)
                   tempSyncData.password[index] = password
                 }
                 insert = true
@@ -388,7 +388,7 @@ const webserver = async () => {
             for (const localTotp of tempSyncData.opt) {
               if (Totp.id === localTotp.id) {
                 if (Totp.deleted != localTotp.deleted) {
-                  const index = tempSyncData.opt.findIndex(item => item.id = localTotp.id)
+                  const index = tempSyncData.opt.findIndex(item => item.id === localTotp.id)
                   tempSyncData.opt[index].deleted = true
                 }
                 insert = true
