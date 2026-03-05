@@ -14,7 +14,7 @@
   },
   "build": {
     "productName": "savepass",
-    "appId": "savepass",
+    "appId": "dev.royaly.savepass",
     "artifactName": "${productName}-${os}-${arch}.${ext}",
     "compression": "normal",
     "nodeGypRebuild": false,
@@ -93,6 +93,10 @@
           "arch": "x64"
         }
       ]
+    },
+    "flatpak": {
+      "runtimeVersion": "24.08",
+      "baseVersion": "24.08"
     }
   },
   "keywords": [],
