@@ -43,8 +43,24 @@ function Homepage() {
       console.log("left : " + data.left)
     });
 
-    (window as any).savepass.syncRefresh(() => {
-      toast.success("Successfully synced with another device !")
+    (window as any).savepass.syncError(() => {
+      toast.error("Error while setup sync with the device")
+    });
+
+    (window as any).savepass.syncRefresh((type: number, name: string) => {
+      switch (type) {
+        case 1:
+          toast.success(`Successfully synced with ${name} !`)
+          break;
+        case 2:
+          toast.success(`Successfully added ${name} !`)
+          break
+        case 3:
+          toast.success(`Successfully removed ${name} from sync devices !`)
+          break
+        default:
+          break;
+      }
       refreshOPT()
     })
 

@@ -1,20 +1,104 @@
 {
-  "name": "my-new-app",
-  "productName": "my-new-app",
+  "name": "SavePass",
+  "productName": "savepass",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "SavePass is a passwordManager where you can store and sync your password and TOTP code with your other devices",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "productName": "savepass",
+    "appId": "savepass",
+    "artifactName": "${productName}-${os}-${arch}.${ext}",
+    "compression": "normal",
+    "nodeGypRebuild": false,
+    "npmRebuild": true,
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "icon": "./src/assets/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": "x64"
+        },
+        {
+          "target": "nsis",
+          "arch": "arm64"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    },
+    "mac": {
+      "icon": "./src/assets/icon.icns",
+      "category": "public.app-category.utilities",
+      "identity": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "universal"
+        },
+        {
+          "target": "zip",
+          "arch": "universal"
+        }
+      ]
+    },
+    "dmg": {
+      "sign": false,
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "artifactName": "${productName}-mac-${arch}.${ext}",
+      "format": "ULFO"
+    },
+    "linux": {
+      "icon": "./app/assets/icon.png",
+      "maintainer": "royaly-dev",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": "x64"
+        },
+        {
+          "target": "deb",
+          "arch": "x64"
+        },
+        {
+          "target": "flatpak",
+          "arch": "x64"
+        }
+      ]
+    }
   },
   "keywords": [],
   "author": {
     "name": "royaly",
-    "email": "81520338+royaly-dev@users.noreply.github.com"
+    "email": "contact@royaly.dev"
   },
   "license": "MIT",
   "devDependencies": {
@@ -37,6 +121,7 @@
     "autoprefixer": "^10.4.23",
     "css-loader": "^6.11.0",
     "electron": "39.2.7",
+    "electron-builder": "^26.8.1",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
@@ -44,7 +129,7 @@
     "style-loader": "^3.3.4",
     "tailwindcss": "^4.1.18",
     "ts-loader": "^9.5.4",
-    "typescript": "~4.5.4"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",

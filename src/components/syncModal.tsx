@@ -41,7 +41,6 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
         }
 
         (window as any).savepass.syncRefresh(async () => {
-            toast.success("Successfully synced with another device !")
             setSyncDeviceData(await (window as any).savepass.GetSyncStatus())
         })
 
@@ -61,8 +60,10 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
     }
 
     const addSyncDevice = async (data: { newdevice: syncData, ip: string }) => {
-        await (window as any).savepass.addSyncDevice(data)
-        GetSyncStatus()
+        const addedDevice = await (window as any).savepass.addSyncDevice(data)
+        if (addedDevice.confirm) {
+            GetSyncStatus()
+        }
     }
 
     const removeSyncDevice = async (data: syncData) => {

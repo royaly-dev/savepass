@@ -24,7 +24,7 @@ const Services: Service[] = []
 
 const mainInstance = instance.find({ type: "http" }, (service: Service) => {
   console.log("Detected a service")
-  if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass")) {
+  if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host).length === 0 && service.addresses.length > 0) {
     Services.push(service)
   }
 })
@@ -43,8 +43,12 @@ const createWindow = (): void => {
     genTotptimeout(0)
   })
 
-  ipcMain.on("syncFinished", () => {
-    mainWindow.webContents.send("syncRefresh")
+  ipcMain.on("syncFinished", (event, data: {type: number, name: string}) => {
+    mainWindow.webContents.send("syncRefresh", data)
+  })
+
+  ipcMain.on("syncError", () => {
+    mainWindow.webContents.send("syncError")
   })
 
   function genTotptimeout(time: number) {
@@ -119,6 +123,7 @@ const startSync = async () => {
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
+          ipcMain.emit("syncFinished", {type: 1, name: scanedDevice.host})
         } else {
           console.log("Error while sync with : " + scanedDevice.name)
         }
@@ -127,7 +132,6 @@ const startSync = async () => {
     }
   }
 
-  ipcMain.emit("syncFinished")
   console.log("Finished to sync with all device !")
 }
 
@@ -270,22 +274,31 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
 ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: string }) => {
   const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
 
-  SyncDevice.data.push(data.newdevice)
-  SyncDevice.lastSync = Date.now()
-  SyncDevice.status = SyncDevice.data.length > 0
-
-  Services.slice(0, Services.length)
-  Services.push(...Services.filter(item => item.host !== data.newdevice.name))
-
-  await store.set("sync", JSON.stringify(SyncDevice))
-  fetch("http://" + data.ip + ":5263/setupSync", {
+  const syncWithDevice = await fetch("http://" + data.ip + ":5263/setupSync", {
     method: 'POST',
     body: JSON.stringify({
       syncKey: syncKey,
       name: hostname()
     })
-  })
-  return { confirm: true }
+  }).then(responce => responce.status)
+
+  if (syncWithDevice === 200) {
+    SyncDevice.data.push(data.newdevice)
+    SyncDevice.lastSync = Date.now()
+    SyncDevice.status = SyncDevice.data.length > 0
+
+    Services.slice(0, Services.length)
+    Services.push(...Services.filter(item => item.host !== data.newdevice.name))
+
+    await store.set("sync", JSON.stringify(SyncDevice))
+
+    return { confirm: true }
+  } else {
+    ipcMain.emit("syncError")
+
+    return { confirm: false }
+  }
+
 })
 
 ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
@@ -334,7 +347,7 @@ const webserver = async () => {
           SyncDevice.status = SyncDevice.data.length > 0
 
           await store.set("sync", JSON.stringify(SyncDevice))
-          ipcMain.emit("syncFinished")
+          ipcMain.emit("syncFinished",  {type: 2, name: parsedbody.name})
           console.log("setup finished")
           instance.unpublishAll()
 
@@ -402,7 +415,7 @@ const webserver = async () => {
           await store.set("sync", JSON.stringify(<syncDevice>{ ...syncDeviceData, lastSync: Date.now() }))
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), master).toString())
 
-          ipcMain.emit("syncFinished")
+          ipcMain.emit("syncFinished",  {type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
           //TODO : encrypt data with the device syncKey to prevent hack
@@ -430,7 +443,7 @@ const webserver = async () => {
         syncData.status = syncData.data.length > 0
         await store.set("sync", JSON.stringify(syncData))
 
-        ipcMain.emit("syncFinished")
+        ipcMain.emit("syncFinished", {type: 3, name: syncData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
 
         res.statusCode = 200
         res.end("")
