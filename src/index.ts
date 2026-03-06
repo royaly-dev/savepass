@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
+import { app, autoUpdater, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
@@ -10,6 +10,8 @@ import { Bonjour, Service } from 'bonjour-service'
 import { hostname } from 'os';
 import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 import { networkInterfaces } from 'node:os';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
+import log from 'electron-log'
 
 const store: any = new Store();
 const instance = new Bonjour({})
@@ -21,6 +23,15 @@ let master = ""
 let syncKey = ""
 let isWaiting = false
 const Services: Service[] = []
+
+updateElectronApp({
+  updateSource: {
+    type: UpdateSourceType.ElectronPublicUpdateService,
+    repo: 'royaly-dev/savepass'
+  },
+  updateInterval: '1 hour',
+  logger: log
+})
 
 const mainInstance = instance.find({ type: "http" }, (service: Service) => {
   console.log("Detected a service")
@@ -43,7 +54,7 @@ const createWindow = (): void => {
     genTotptimeout(0)
   })
 
-  ipcMain.on("syncFinished", (event, data: {type: number, name: string}) => {
+  ipcMain.on("syncFinished", (event, data: { type: number, name: string }) => {
     mainWindow.webContents.send("syncRefresh", data)
   })
 
@@ -123,7 +134,7 @@ const startSync = async () => {
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
-          ipcMain.emit("syncFinished", {type: 1, name: scanedDevice.host})
+          ipcMain.emit("syncFinished", { type: 1, name: scanedDevice.host })
         } else {
           console.log("Error while sync with : " + scanedDevice.name)
         }
@@ -347,7 +358,7 @@ const webserver = async () => {
           SyncDevice.status = SyncDevice.data.length > 0
 
           await store.set("sync", JSON.stringify(SyncDevice))
-          ipcMain.emit("syncFinished",  {type: 2, name: parsedbody.name})
+          ipcMain.emit("syncFinished", { type: 2, name: parsedbody.name })
           console.log("setup finished")
           instance.unpublishAll()
 
@@ -415,7 +426,7 @@ const webserver = async () => {
           await store.set("sync", JSON.stringify(<syncDevice>{ ...syncDeviceData, lastSync: Date.now() }))
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), master).toString())
 
-          ipcMain.emit("syncFinished",  {type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
+          ipcMain.emit("syncFinished", { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
           //TODO : encrypt data with the device syncKey to prevent hack
@@ -443,7 +454,7 @@ const webserver = async () => {
         syncData.status = syncData.data.length > 0
         await store.set("sync", JSON.stringify(syncData))
 
-        ipcMain.emit("syncFinished", {type: 3, name: syncData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
+        ipcMain.emit("syncFinished", { type: 3, name: syncData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
 
         res.statusCode = 200
         res.end("")

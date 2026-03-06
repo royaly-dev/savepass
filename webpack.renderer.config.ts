@@ -13,7 +13,7 @@ const rules = [
 ];
 
 export const rendererConfig: Configuration = {
-  target: 'electron-renderer',
+  target: 'web',
   module: {
     rules,
   },
@@ -23,5 +23,8 @@ export const rendererConfig: Configuration = {
       "@": path.resolve(__dirname, "src"),
     },
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
+    fallback: {
+      events: require.resolve('events/'),
+    },
   },
 };
