@@ -31,7 +31,7 @@ const config: ForgeConfig = {
           owner: 'royaly-dev',
           name: 'savepass'
         },
-        draft: true,
+        draft: false,
         prerelease: false
       }
     }
