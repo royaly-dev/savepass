@@ -24,7 +24,7 @@ jobs:
         with:
           tag_name: ${{ env.version }}
           release_name: ${{ env.version }}
-          draft: false
+          draft: true
           prerelease: false
 
   build-app:
