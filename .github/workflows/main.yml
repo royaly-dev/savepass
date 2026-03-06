@@ -37,5 +37,5 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run make
+        run: npm run publish
         shell: bash
