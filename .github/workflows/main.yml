@@ -1,7 +1,7 @@
 name: Build Release
 on:
   push:
-    branches: [main]
+    branches: [main, test_actions]
 
 jobs:
   create-release:
