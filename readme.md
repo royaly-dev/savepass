@@ -83,7 +83,7 @@ Here're some of the project's best features:
     > **Note:** The flatpak and flatpak-builder packages need to be installed in order to build Flatpak bundles.
     >
     >Also **you need** to install on flatpack these components : 
-    flathub org.freedesktop.Sdk - org.freedesktop.Platform - org.electronjs.Electron2.BaseApp
+    flathub org.freedesktop.Sdk//24.08 - org.freedesktop.Platform//24.08 - org.electronjs.Electron2.BaseApp
 
 3. Now you can build from source !
 
