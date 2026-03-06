@@ -3,6 +3,9 @@ on:
   push:
     branches: [main, test_actions]
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -17,10 +20,10 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.version }}
-          release_name: ${{env.version}}
+          release_name: ${{ env.version }}
           draft: false
           prerelease: false
 
@@ -54,6 +57,6 @@ jobs:
 
       - name: Build
         env:
-          GH_TOKEN: ${{ secrets.TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run make
         shell: bash
