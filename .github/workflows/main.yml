@@ -17,7 +17,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{secrets.TOKEN }}
         with:
           tag_name: ${{ env.version }}
           release_name: ${{env.version}}
@@ -53,6 +53,6 @@ jobs:
 
       - name: Build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.TOKEN }}
         run: npm run make
         shell: bash
