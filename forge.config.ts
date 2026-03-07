@@ -21,8 +21,8 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({ options: { icon: "assets/icon.png" } }),
-    new MakerDeb({ options: { icon: "assets/icon.png" } }),
+    new MakerRpm({ options: { icon: "./src/assets/icon.png" } }),
+    new MakerDeb({ options: { icon: "./src/assets/icon.png" } }),
   ],
   publishers: [
     {
