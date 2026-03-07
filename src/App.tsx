@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import MasterPasswordSetup from '@/components/MasterPasswordSetup';
 import MasterPasswordCheck from '@/components/MasterPasswordCheck';
-import { Check, KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
+import { Check, Download, KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Data, OptData, PasswordData, syncData, syncDevice } from '@/types/Data';
 import { Button } from './components/ui/button';
@@ -45,6 +45,10 @@ function Homepage() {
 
     (window as any).savepass.syncError(() => {
       toast.error("Error while setup sync with the device")
+    });
+
+    (window as any).savepass.update(() => {
+      toast.info("A new update is available !", { duration: 10000, action: <Button size='sm' variant='default' onClick={() => { (window as any).savepass.openLink("https://github.com/royaly-dev/savepass/releases/latest") }} >Download</Button>, icon: <Download size={16} /> })
     });
 
     (window as any).savepass.syncRefresh((type: number, name: string) => {

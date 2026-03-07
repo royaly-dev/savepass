@@ -24,14 +24,23 @@ let syncKey = ""
 let isWaiting = false
 const Services: Service[] = []
 
-updateElectronApp({
-  updateSource: {
-    type: UpdateSourceType.ElectronPublicUpdateService,
-    repo: 'royaly-dev/savepass'
-  },
-  updateInterval: '1 hour',
-  logger: log
-})
+const checkUpdateForLinux = async () => {
+  const fetchForVersion = await fetch("https://api.github.com/repos/royaly-dev/savepass/releases/latest").then(async responce => await responce.json())
+  if (fetchForVersion?.tag_name > "v" + app.getVersion()) {
+    ipcMain.emit("update")
+  }
+}
+
+if (process.platform != "linux") {
+  updateElectronApp({
+    updateSource: {
+      type: UpdateSourceType.ElectronPublicUpdateService,
+      repo: 'royaly-dev/savepass'
+    },
+    updateInterval: '1 hour',
+    logger: log
+  })
+}
 
 const mainInstance = instance.find({ type: "http" }, (service: Service) => {
   console.log("Detected a service")
@@ -60,6 +69,10 @@ const createWindow = (): void => {
 
   ipcMain.on("syncError", () => {
     mainWindow.webContents.send("syncError")
+  })
+
+  ipcMain.on("update", () => {
+    mainWindow.webContents.send("update")
   })
 
   function genTotptimeout(time: number) {
@@ -183,6 +196,7 @@ ipcMain.handle("Check", (event, data) => {
     return false
   } else {
     master = data;
+    checkUpdateForLinux()
     syncKey = (<syncDevice>JSON.parse(store.get("sync"))).syncKey
     if ((<syncDevice>JSON.parse(store.get("sync"))).status) {
       startSync()

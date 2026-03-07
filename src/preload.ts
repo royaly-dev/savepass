@@ -51,13 +51,18 @@ contextBridge.exposeInMainWorld('savepass', {
   removeSyncDevice: async (data: syncData) => {
     return await ipcRenderer.invoke("removeSyncDevice", data)
   },
-  syncRefresh: (callback: (data: {type: number, name: string}) => void) => {
-    ipcRenderer.on("syncRefresh", (event, data: {type: number, name: string}) => {
+  syncRefresh: (callback: (data: { type: number, name: string }) => void) => {
+    ipcRenderer.on("syncRefresh", (event, data: { type: number, name: string }) => {
       callback(data)
     })
   },
   syncError: (callback: any) => {
     ipcRenderer.on("syncError", () => {
+      callback()
+    })
+  },
+  update: (callback: any) => {
+    ipcRenderer.on("update", () => {
       callback()
     })
   }
