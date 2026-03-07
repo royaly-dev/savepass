@@ -77,10 +77,10 @@ Here're some of the project's best features:
     ```
 
     ```bash
-    flatpak install --user --assumeyes flatseal
+    apt install flatpak flatpak-builder rpm
     ```
 
-    > **Note:** The flatpak and flatpak-builder packages need to be installed in order to build Flatpak bundles.
+    > **Note:** The flatpak, flatpak-builder and rpm packages is need to be installed in order to build the app.
     >
     >Also **you need** to install on flatpack these components : 
     flathub org.freedesktop.Sdk//24.08 - org.freedesktop.Platform//24.08 - org.electronjs.Electron2.BaseApp
@@ -88,5 +88,8 @@ Here're some of the project's best features:
 3. Now you can build from source !
 
     ```bash
-    npm run build
+    npm run make
     ```
+
+<h2>✨ Credits</h2>
+This project was mostly written by me, but to fix some issues I had with the electron-forge builder I asked GitHub Copilot to help me figure out what was wrong.
