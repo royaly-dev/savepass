@@ -12,6 +12,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 import { networkInterfaces } from 'node:os';
 import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
 import log from 'electron-log'
+import ElectronStore from 'electron-store';
 
 const store: any = new Store();
 const instance = new Bonjour({})
@@ -54,6 +55,8 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     autoHideMenuBar: true,
+    icon: "assets/icon.ico",
+    title: "SavePass",
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },

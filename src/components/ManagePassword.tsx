@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Data, PasswordData } from "@/types/Data"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import PasswordInput from "./passwordInput"
 
 export default function ManagePassword(props: { data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void }) {
 
@@ -99,7 +100,9 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
                     </Combobox>
 
                     <Label htmlFor="password">Password</Label>
-                    <Input value={password.password} onChange={(e) => { setPassword({ ...password, password: e.currentTarget.value }) }} id="password" type="password"></Input>
+                    <div className='relative flex justify-center items-center w-full'>
+                        <PasswordInput form={false} value={password.password} valueChange={(text) => { setPassword({ ...password, password: text }) }} id="password" />
+                    </div>
                     <Button onClick={savepassord} variant="default" className="w-full mt-4">Save</Button>
                 </div>
             </DialogContent>

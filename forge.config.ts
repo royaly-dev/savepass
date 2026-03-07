@@ -15,13 +15,14 @@ const config: ForgeConfig = {
   packagerConfig: {
     name: "savepass",
     asar: true,
+    icon: "./src/assets/icon.png"
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerRpm({ options: { icon: "assets/icon.png" } }),
+    new MakerDeb({ options: { icon: "assets/icon.png" } }),
   ],
   publishers: [
     {

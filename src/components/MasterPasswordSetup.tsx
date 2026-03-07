@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Eye, EyeOff } from 'lucide-react'
+import PasswordInput from './passwordInput'
 
 export default function MasterPasswordSetup() {
     const [isRegister, setIsRegister] = useState<boolean>(true);
@@ -26,75 +27,66 @@ export default function MasterPasswordSetup() {
     }, []);
 
     return (
-        <Dialog open={!isRegister} onOpenChange={() => {}}>
-                <DialogContent className="sm:max-w-106.25">
-                    <form onSubmit={async(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget)
+        <Dialog open={!isRegister} onOpenChange={() => { }}>
+            <DialogContent className="sm:max-w-106.25">
+                <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget)
 
-                        const master = String(formData.get("Master"))
-                        const masterCheck = String(formData.get("masterCheck"))
+                    const master = String(formData.get("Master"))
+                    const masterCheck = String(formData.get("masterCheck"))
 
-                        console.log(master)
-                        
-                        if (master.toString().length < 8) {
-                            toast.error("Your password must be at least 8 characters")
-                            return
-                        }
+                    console.log(master)
+                    console.log(masterCheck)
 
-                        if (master !== masterCheck) {
-                            toast.error("Both passwords must be the same.")
-                            return
-                        }
+                    if (master.toString().length < 8) {
+                        toast.error("Your password must be at least 8 characters")
+                        return
+                    }
 
-                        const register = await (window as any).savepass.Register(master)
-                        
-                        if (register) {
-                            setIsRegister(!isRegister)
-                            toast.success("Your password has been successfully saved !")
-                            window.location.reload()
-                        } else {
-                            toast.error("An error occurred")
-                        }
-                        
-                    }}>
-                        <DialogHeader>
-                            <DialogTitle>Setup your Master password</DialogTitle>
-                            <DialogDescription>
-                                This is the only password you need to remember, it's the key that secures all of your passwords in this application.
-                            </DialogDescription>
-                        </DialogHeader>
+                    if (master !== masterCheck) {
+                        toast.error("Both passwords must be the same.")
+                        return
+                    }
 
-                        <div className="grid gap-4 mt-4">
-                            <div className="grid gap-3">
-                                <Label htmlFor="Master">Password :</Label>
-                                <div className='relative flex justify-center items-center'>
-                                    <Input id="Master" name="Master" type={showPassword ? "text" : "password"} />
-                                    {
-                                        showPassword
-                                        ? <EyeOff onClick={() => {setShowPassword(false)}} className='absolute right-4 cursor-pointer hover:bg-foreground/20 p-1 rounded-sm box-content' size={18} />
-                                        : <Eye onClick={() => {setShowPassword(true)}} className='absolute right-4 cursor-pointer hover:bg-foreground/20 p-1 rounded-sm box-content' size={18} />
-                                    }
-                                </div>
-                            </div>
-                            <div className="grid gap-3">
-                                <Label htmlFor="masterCheck">Repeat password :</Label>
-                                <div className='relative flex justify-center items-center'>
-                                    <Input id="masterCheck" name="masterCheck" type={showPassword ? "text" : "password"} />
-                                    {
-                                        showPassword
-                                        ? <EyeOff onClick={() => {setShowPassword(false)}} className='absolute right-4 cursor-pointer hover:bg-foreground/20 p-1 rounded-sm box-content' size={18} />
-                                        : <Eye onClick={() => {setShowPassword(true)}} className='absolute right-4 cursor-pointer hover:bg-foreground/20 p-1 rounded-sm box-content' size={18} />
-                                    }
-                                </div>
+                    const register = await (window as any).savepass.Register(master)
+
+                    if (register) {
+                        setIsRegister(!isRegister)
+                        toast.success("Your password has been successfully saved !")
+                        window.location.reload()
+                    } else {
+                        toast.error("An error occurred")
+                    }
+
+                }}>
+                    <DialogHeader>
+                        <DialogTitle>Setup your Master password</DialogTitle>
+                        <DialogDescription>
+                            This is the only password you need to remember, it's the key that secures all of your passwords in this application.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 mt-4">
+                        <div className="grid gap-3">
+                            <Label htmlFor="Master">Password :</Label>
+                            <div className='relative flex justify-center items-center'>
+                                <PasswordInput form id='Master' />
                             </div>
                         </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="masterCheck">Repeat password :</Label>
+                            <div className='relative flex justify-center items-center'>
+                                <PasswordInput form id='masterCheck' />
+                            </div>
+                        </div>
+                    </div>
 
-                        <DialogFooter>
-                            <Button className='cursor-pointer mt-4' type="submit">Create</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
+                    <DialogFooter>
+                        <Button className='cursor-pointer mt-4' type="submit">Create</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
         </Dialog>
     );
 }
