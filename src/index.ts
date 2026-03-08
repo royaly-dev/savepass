@@ -12,7 +12,10 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 import { networkInterfaces } from 'node:os';
 import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
 import log from 'electron-log'
-import ElectronStore from 'electron-store';
+import launching from 'electron-squirrel-startup'
+
+
+if (launching) app.quit()
 
 const store: any = new Store();
 const instance = new Bonjour({})
@@ -199,7 +202,9 @@ ipcMain.handle("Check", (event, data) => {
     return false
   } else {
     master = data;
-    checkUpdateForLinux()
+    if (process.platform == "linux") {
+      checkUpdateForLinux()
+    }
     syncKey = (<syncDevice>JSON.parse(store.get("sync"))).syncKey
     if ((<syncDevice>JSON.parse(store.get("sync"))).status) {
       startSync()
