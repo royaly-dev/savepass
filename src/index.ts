@@ -98,13 +98,15 @@ const createWindow = (): void => {
 
 async function genTotp() {
   const timeleft = getRemainingTime()
-  const savedData = <OptData[]>JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)).opt
+  const savedData = <OptData[]>JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)).opt.filter((item: OptData) => !item.deleted)
   for (let i = 0; i < savedData.length; i++) {
     try {
       savedData[i].key = await generate({ secret: savedData[i].key })
     } catch (error) {
       console.log("key : " + savedData[i].key + " is not valid !")
       savedData[i].key = "000000"
+      savedData[i].name = "Invalid"
+      savedData[i].provider = "TOTP code"
     }
   }
   return { left: timeleft, data: savedData }

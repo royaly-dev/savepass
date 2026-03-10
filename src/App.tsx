@@ -112,9 +112,10 @@ function Homepage() {
   }
 
   const RequestTotpDeletion = async (dataDeletion: OptData) => {
-    console.log(data);
-    console.log({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: false } : item) });
-    (window as any).savepass.SaveData({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: false } : item) })
+    console.log("data : " + JSON.stringify(data));
+    console.log(dataDeletion)
+    console.log({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: true } : item) });
+    (window as any).savepass.SaveData({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: true } : item) })
     refreshOPT()
   }
 
@@ -139,8 +140,11 @@ function Homepage() {
 
   if (!confirm) {
     return (
-      <><MasterPasswordCheck confirmCheck={() => { setConfirm(true) }} />
-        <MasterPasswordSetup /></>
+      <div className='h-screen w-screen flex justify-center items-center'>
+        <h1 className='text-black text-5xl font-[DM_Sans]'>Loading...</h1>
+        <MasterPasswordCheck confirmCheck={() => { setConfirm(true) }} />
+        <MasterPasswordSetup />
+      </div>
     )
   }
 
