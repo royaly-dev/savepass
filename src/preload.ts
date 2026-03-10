@@ -65,5 +65,8 @@ contextBridge.exposeInMainWorld('savepass', {
     ipcRenderer.on("update", () => {
       callback()
     })
+  },
+  isTotpValid: async (code: string) => {
+    return await ipcRenderer.invoke("isTotpValid", code)
   }
 })

@@ -100,7 +100,12 @@ async function genTotp() {
   const timeleft = getRemainingTime()
   const savedData = <OptData[]>JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8)).opt
   for (let i = 0; i < savedData.length; i++) {
-    savedData[i].key = await generate({ secret: savedData[i].key })
+    try {
+      savedData[i].key = await generate({ secret: savedData[i].key })
+    } catch (error) {
+      console.log("key : " + savedData[i].key + " is not valid !")
+      savedData[i].key = "000000"
+    }
   }
   return { left: timeleft, data: savedData }
 }
@@ -235,6 +240,17 @@ ipcMain.on("SaveData", (event, data) => {
   }
 
   store.set('data', CryptoJS.AES.encrypt(JSON.stringify(data), master).toString())
+})
+
+ipcMain.handle("isTotpValid", async (event, code: string) => {
+  try {
+    const test = await generate({ secret: code })
+    console.log("valid")
+    return true
+  } catch (error) {
+    console.log("invalid")
+    return false
+  }
 })
 
 ipcMain.handle("ImportData", async () => {

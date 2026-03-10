@@ -37,8 +37,14 @@ export default function ManageTotp(props: { data: Data, request: boolean, refres
         }
     }, [props.request])
 
-    const savetopt = () => {
+    const savetopt = async () => {
         try {
+
+            if (await (window as any).savepass.isTotpValid(totp.key) === false) {
+                toast.error("You need to provide a valid TOTP code !")
+                return
+            }
+
             let newdata = props.data
             newdata.opt.push(totp)
             setTempNewMailValue(null)
