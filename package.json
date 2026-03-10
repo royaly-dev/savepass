@@ -1,7 +1,7 @@
 {
   "name": "savepass",
   "productName": "savepass",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "SavePass is a passwordManager where you can store and sync your password and TOTP code with your other devices",
   "main": ".webpack/main",
   "scripts": {
