@@ -46,30 +46,33 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
     }, [props.requestPassword])
 
     const savepassord = () => {
-        password.lastedit = Date.now()
+
         try {
-            let newdata = props.data
-            if (props.type == "add") {
-                newdata.password.push(password)
-            } else {
-
-                const index = newdata.password.findIndex(
-                    item => item.id === password.id
-                )
-
-                if (index != -1) {
-                    newdata.password[index] = password
-                }
-            }
-            if (new URL(password.url).hostname) {
-                (window as any).savepass.SaveData(newdata)
-                props.openChange()
-                setPassword({ id: (crypto as any).randomUUID(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
-            }
-            setTempNewMailValue(null)
+            const testurl = new URL(password.url);
         } catch (error) {
-            toast.error("Your your must be a valid url !")
+            toast.error("You need to provide a valid URl (ex: https://name.com/)")
+            return
         }
+
+        password.lastedit = Date.now()
+        let newdata = props.data
+        if (props.type == "add") {
+            newdata.password.push(password)
+        } else {
+
+            const index = newdata.password.findIndex(
+                item => item.id === password.id
+            )
+
+            if (index != -1) {
+                newdata.password[index] = password
+            }
+        }
+
+        (window as any).savepass.SaveData(newdata)
+        props.openChange()
+        setPassword({ id: (crypto as any).randomUUID(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
+        setTempNewMailValue(null)
     }
 
     const existingMails = [...new Set(props?.data?.password?.map(p => p.mail).filter(Boolean)), (tempNewMailValue != null && tempNewMailValue)]
@@ -82,7 +85,7 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
                 </DialogHeader>
                 <div className="flex justify-center items-start flex-col gap-4">
                     <Label htmlFor="url">URL</Label>
-                    <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.currentTarget.value }) }} id="url" type="url"></Input>
+                    <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.currentTarget.value }) }} id="url" type="url" placeholder="https://exemple.com/"></Input>
 
                     <Label htmlFor="mail">Email / Username</Label>
                     <Combobox items={existingMails} value={password.mail} onValueChange={(value) => { setPassword({ ...password, mail: String(value) }) }} onOpenChange={(open) => { if (!open && password.mail !== tempNewMailValue) setPassword({ ...password, mail: String(tempNewMailValue) }) }} onInputValueChange={setTempNewMailValue}>
