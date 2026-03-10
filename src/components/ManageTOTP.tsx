@@ -22,7 +22,7 @@ import { toast } from "sonner"
 export default function ManageTotp(props: { data: Data, request: boolean, refresh(): void, openChange(): void }) {
 
     const [totp, setTotp] = useState<OptData>({ key: "", id: (crypto as any).randomUUID(), name: "", provider: "", deleted: false })
-    const [tempNewMailValue, setTempNewMailValue] = useState<string>(null)
+    const [tempNewMailValue, setTempNewMailValue] = useState<string>("")
     const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
@@ -70,7 +70,7 @@ export default function ManageTotp(props: { data: Data, request: boolean, refres
                     <Input value={totp.provider} onChange={(e) => { setTotp({ ...totp, provider: e.currentTarget.value }) }} id="website" type="text"></Input>
 
                     <Label htmlFor="mail">Email / Username</Label>
-                    <Combobox items={existingMails} onValueChange={(value) => { setTotp({ ...totp, name: String(value) }) }} onInputValueChange={setTempNewMailValue}>
+                    <Combobox items={existingMails} value={totp.name} onValueChange={(value) => { setTotp({ ...totp, name: String(value) }) }} onOpenChange={(open) => { if (!open && tempNewMailValue !== totp.name) setTotp({ ...totp, name: String(tempNewMailValue) }) }} onInputValueChange={setTempNewMailValue}>
                         <ComboboxInput placeholder="Your email / username" />
                         <ComboboxContent>
                             <ComboboxEmpty>No items found.</ComboboxEmpty>

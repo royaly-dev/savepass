@@ -23,7 +23,7 @@ import PasswordInput from "./passwordInput"
 export default function ManagePassword(props: { data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void }) {
 
     const [password, setPassword] = useState<PasswordData>({ id: (crypto as any).randomUUID(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
-    const [tempNewMailValue, setTempNewMailValue] = useState<string>(null)
+    const [tempNewMailValue, setTempNewMailValue] = useState<string>("")
     const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
@@ -85,7 +85,7 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
                     <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.currentTarget.value }) }} id="url" type="url"></Input>
 
                     <Label htmlFor="mail">Email / Username</Label>
-                    <Combobox items={existingMails} onValueChange={(value) => { setPassword({ ...password, mail: String(value) }) }} onInputValueChange={setTempNewMailValue}>
+                    <Combobox items={existingMails} value={password.mail} onValueChange={(value) => { setPassword({ ...password, mail: String(value) }) }} onOpenChange={(open) => { if (!open && password.mail !== tempNewMailValue) setPassword({ ...password, mail: String(tempNewMailValue) }) }} onInputValueChange={setTempNewMailValue}>
                         <ComboboxInput placeholder="Your email / username" />
                         <ComboboxContent>
                             <ComboboxEmpty>No items found.</ComboboxEmpty>
