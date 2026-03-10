@@ -15,8 +15,8 @@
 Here're some of the project's best features:
 
 *   Save your password
-*   Save your TOTP code
-*   Sync between devices
+*   Save your TOTP code (like an Authenticator app)
+*   Sync between devices (on the same network)
 *   Import / Export your data in a JSON file
 
 <h2>🛠️ Installation Steps ( for windows ):</h2>
