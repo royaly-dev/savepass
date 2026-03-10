@@ -273,12 +273,28 @@ ipcMain.handle("ImportData", async () => {
     for (const password of parsedData.password) {
       if (!newData.password.some(p => p.id === password.id)) {
         newData.password.push(password)
+      } else {
+        const index = newData.password.findIndex(
+          item => item.id === password.id
+        )
+
+        if (index !== -1 && !password.deleted) {
+          newData.password[index] = password
+        }
       }
     }
 
     for (const totp of parsedData.opt) {
       if (!newData.opt.some(o => o.id === totp.id)) {
         newData.opt.push(totp)
+      } else {
+        const index = newData.opt.findIndex(
+          item => item.id === totp.id
+        )
+
+        if (index !== -1 && !totp.deleted) {
+          newData.opt[index] = totp
+        }
       }
     }
 
