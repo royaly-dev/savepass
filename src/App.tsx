@@ -13,6 +13,9 @@ import ManageTotp from './components/ManageTOTP';
 import { toast } from 'sonner';
 import { Service } from 'bonjour-service';
 import SyncModal from './components/syncModal';
+import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from './components/ui/combobox';
+import { Input } from './components/ui/input';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './components/ui/select';
 
 function Homepage() {
 
@@ -26,6 +29,8 @@ function Homepage() {
   const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData>(null)
   const [optCode, setOptCode] = useState<OptData[]>()
   const [optCodeLeft, setOptCodeLeft] = useState<number>(0)
+  const [SelectValueSearch, setSelectValueSearch] = useState<string>("By WebSite")
+  const [SearchValue, setSearchValue] = useState<string>("")
 
   useEffect(() => {
     if (!carouselApi) {
@@ -161,12 +166,34 @@ function Homepage() {
         <CarouselContent className='max-h-screen'>
           <CarouselItem>
             <div className='h-screen py-4 flex items-start flex-col'>
-              <Button onClick={() => { setIsAddingPassword(true) }} variant="default" className='cursor-pointer my-3 shrink-0'>Add password</Button>
+              <div className='flex justify-between items-center w-full'>
+                <Button onClick={() => { setIsAddingPassword(true) }} variant="default" className='cursor-pointer my-3 shrink-0'>Add password</Button>
+                <div className='flex justify-center items-center gap-1'>
+                  <Select value={SelectValueSearch} onValueChange={setSelectValueSearch}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent position='popper'>
+                      <SelectGroup>
+                        <SelectItem key={'name'} value={'By Mail & User'}>By Mail & user</SelectItem>
+                        <SelectItem key={'web'} value={'By WebSite'}>By WebSite</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Input className='w-46' placeholder='Search' value={SearchValue} type='text' onChange={(e) => { setSearchValue(e.target.value) }} />
+                </div>
+              </div>
               <div className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
                 {
-                  data?.password && data?.password.length != 0
+                  data?.password && data?.password.filter(item => !item.deleted).length != 0
                     ? data.password.map((item) => {
-                      return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
+                      if (SearchValue === "") {
+                        return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
+                      } else if (SearchValue !== "" && SelectValueSearch === "By WebSite" && new URL(item.url).hostname.includes(SearchValue)) {
+                        return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
+                      } else if (SearchValue !== "" && SelectValueSearch === "By Mail & User" && item.mail.includes(SearchValue)) {
+                        return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
+                      }
                     })
                     : <div className='flex justify-center items-center flex-col'>
                       <h3 className='text-xl text-muted-foreground'>No password saved</h3>
@@ -177,12 +204,34 @@ function Homepage() {
           </CarouselItem>
           <CarouselItem>
             <div className='h-screen py-4 flex items-start flex-col'>
-              <Button onClick={() => { setIsAddingTOTP(true) }} variant="default" className='cursor-pointer my-3 shrink-0'>Add A TOTP code</Button>
+              <div className='flex justify-between items-center w-full'>
+                <Button onClick={() => { setIsAddingTOTP(true) }} variant="default" className='cursor-pointer my-3 shrink-0'>Add A TOTP code</Button>
+                <div className='flex justify-center items-center gap-1'>
+                  <Select value={SelectValueSearch} onValueChange={setSelectValueSearch}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent position='popper'>
+                      <SelectGroup>
+                        <SelectItem key={'name'} value={'By Mail & User'}>By Mail & user</SelectItem>
+                        <SelectItem key={'web'} value={'By WebSite'}>By WebSite</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Input className='w-46' placeholder='Search' value={SearchValue} type='text' onChange={(e) => { setSearchValue(e.target.value) }} />
+                </div>
+              </div>
               <div className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
                 {
-                  optCode && optCode.length != 0
+                  optCode && optCode.filter(item => !item.deleted).length != 0
                     ? optCode.map((item) => {
-                      return !item.deleted && <OptCodeCard key={item.id} time={optCodeLeft} data={item} requestDelete={RequestTotpDeletion} />
+                      if (SearchValue === "") {
+                        return !item.deleted && <OptCodeCard key={item.id} time={optCodeLeft} data={item} requestDelete={RequestTotpDeletion} />
+                      } else if (SearchValue !== "" && SelectValueSearch === "By WebSite" && item.provider.includes(SearchValue)) {
+                        return !item.deleted && <OptCodeCard key={item.id} time={optCodeLeft} data={item} requestDelete={RequestTotpDeletion} />
+                      } else if (SearchValue !== "" && SelectValueSearch == "By Mail & User" && item.name.includes(SearchValue)) {
+                        return !item.deleted && <OptCodeCard key={item.id} time={optCodeLeft} data={item} requestDelete={RequestTotpDeletion} />
+                      }
                     })
                     : <div className='flex justify-center items-center flex-col'>
                       <h3 className='text-xl text-muted-foreground'>No TOTP saved</h3>

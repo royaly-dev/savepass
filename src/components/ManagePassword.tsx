@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Data, PasswordData } from "@/types/Data"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 import PasswordInput from "./passwordInput"
 
@@ -24,6 +24,8 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
 
     const [password, setPassword] = useState<PasswordData>({ id: (crypto as any).randomUUID(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
     const [tempNewMailValue, setTempNewMailValue] = useState<string>("")
+    const tempNewMailRef = React.useRef<string>("")
+    const selectedFromListRef = React.useRef(false)
     const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
@@ -88,7 +90,22 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
                     <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.currentTarget.value }) }} id="url" type="url" placeholder="https://exemple.com/"></Input>
 
                     <Label htmlFor="mail">Email / Username</Label>
-                    <Combobox items={existingMails} value={password.mail} onValueChange={(value) => { setPassword({ ...password, mail: String(value) }) }} onOpenChange={(open) => { if (!open && password.mail !== tempNewMailValue) setPassword({ ...password, mail: String(tempNewMailValue) }) }} onInputValueChange={setTempNewMailValue}>
+                    <Combobox items={existingMails} value={password.mail}
+                        onValueChange={(value) => {
+                            selectedFromListRef.current = true; setPassword({
+                                ...password, mail: String(value || "")
+                            })
+                        }}
+                        onOpenChange={(open) => {
+                            if (!open && !selectedFromListRef.current && tempNewMailRef.current) {
+                                setPassword({ ...password, mail: tempNewMailRef.current })
+                            }
+                            selectedFromListRef.current = false
+                        }}
+                        onInputValueChange={(value) => {
+                            setTempNewMailValue(value)
+                            tempNewMailRef.current = value
+                        }}>
                         <ComboboxInput placeholder="Your email / username" />
                         <ComboboxContent>
                             <ComboboxEmpty>No items found.</ComboboxEmpty>
