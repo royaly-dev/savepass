@@ -20,8 +20,7 @@ import { syncData, syncDevice } from "@/types/Data";
 import { useEffect, useState } from "react";
 import { Service } from "bonjour-service";
 import { Button } from "./ui/button";
-import { Check } from "lucide-react";
-import { toast } from "sonner";
+import { Check, MonitorSmartphone } from "lucide-react";
 
 export default function SyncModal({ ImportData, ExportData }: { ImportData(): void, ExportData(): void }) {
 
@@ -77,7 +76,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
         }
 
         if (syncModalPairMode === "Wait") {
-            carouselApiModal.scrollTo(3)
+            carouselApiModal.scrollTo(4)
             SyncSetup("wait")
         } else {
             carouselApiModal.scrollNext()
@@ -85,7 +84,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
     }
 
     return (
-        <div className='h-screen py-4 flex items-start flex-col max-w-full'>
+        <div className='h-full py-4 flex items-start flex-col max-w-full w-full'>
             <Dialog onOpenChange={() => { setSyncDeviceModal({ open: false, data: [], type: 0 }) }} open={syncDeviceModal.open}>
                 <DialogContent>
                     <DialogHeader>
@@ -126,6 +125,13 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                                         </Field>
                                     </FieldLabel>
                                 </RadioGroup>
+                                <Button variant='default' className='self-end' disabled={syncModalPairMode === null} onClick={() => { next() }}>Next</Button>
+                            </CarouselItem>
+                            <CarouselItem className='flex justify-between items-center flex-col gap-4'>
+                                <div className="mt-4 flex justify-center items-center flex-col gap-1">
+                                    <MonitorSmartphone size={64} color='#fff' className='rounded-full p-3 box-content bg-[#0769e152]' />
+                                    <p className='font-medium text-base'>Now go to the other device and click on the "Wait to be paired" button, then click here on the "next" button.</p>
+                                </div>
                                 <Button variant='default' className='self-end' disabled={syncModalPairMode === null} onClick={() => { next() }}>Next</Button>
                             </CarouselItem>
                             <CarouselItem>

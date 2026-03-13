@@ -16,6 +16,7 @@ import SyncModal from './components/syncModal';
 import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from './components/ui/combobox';
 import { Input } from './components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './components/ui/select';
+import RecoverPasswordModal from './components/RecoverPasswordModal';
 
 function Homepage() {
 
@@ -124,6 +125,11 @@ function Homepage() {
     refreshOPT()
   }
 
+  const requestRecover = async (dataRecover: PasswordData) => {
+    (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id === dataRecover.id ? { ...item, deleted: false } : item) });
+    refresh()
+  }
+
   const ImportData = async () => {
     const iscanceled: { canceled: boolean } = await (window as any).savepass.ImportData()
     if (iscanceled.canceled) {
@@ -183,7 +189,7 @@ function Homepage() {
                   <Input className='w-46' placeholder='Search' value={SearchValue} type='text' onChange={(e) => { setSearchValue(e.target.value) }} />
                 </div>
               </div>
-              <div className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
+              <div style={{ scrollbarWidth: "thin" }} className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
                 {
                   data?.password && data?.password.filter(item => !item.deleted).length != 0
                     ? data.password.map((item) => {
@@ -221,7 +227,7 @@ function Homepage() {
                   <Input className='w-46' placeholder='Search' value={SearchValue} type='text' onChange={(e) => { setSearchValue(e.target.value) }} />
                 </div>
               </div>
-              <div className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
+              <div style={{ scrollbarWidth: "thin" }} className='flex flex-col flex-1 overflow-y-auto gap-3 min-h-0 items-center w-full'>
                 {
                   optCode && optCode.filter(item => !item.deleted).length != 0
                     ? optCode.map((item) => {
@@ -241,7 +247,10 @@ function Homepage() {
             </div>
           </CarouselItem>
           <CarouselItem>
-            <SyncModal ImportData={ImportData} ExportData={ExportData} />
+            <div className='h-screen flex justify-center items-center flex-col py-4 w-full'>
+              <RecoverPasswordModal data={data?.password || []} requestRecover={requestRecover} />
+              <SyncModal ImportData={ImportData} ExportData={ExportData} />
+            </div>
           </CarouselItem>
         </CarouselContent>
       </Carousel>

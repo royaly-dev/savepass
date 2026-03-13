@@ -4,8 +4,9 @@ import { PasswordData } from "@/types/Data";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
 
-export default function PasswordCard(props: { data: PasswordData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
+export default function RecoverPasswordCard(props: { data: PasswordData, requestRecover(data: PasswordData): void }) {
 
     const [showpass, setShowpass] = useState<boolean>(false)
     const [errorLoadingImage, setErrorLoadingImage] = useState<boolean>(false)
@@ -26,7 +27,7 @@ export default function PasswordCard(props: { data: PasswordData, requestEdit(da
                     {errorLoadingImage
                         ? <Globe size={24} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md" />
                         : <div className="p-3 box-content rounded-md relative overflow-hidden">
-                            <img style={{ height: 24, width: 24, borderRadius: "100%" }} src={"https://www.google.com/s2/favicons?domain=" + new URL(props.data.url)} onError={() => { setErrorLoadingImage(true) }} className="z-10 relative" />
+                            <img style={{ height: 24, width: 24, minHeight: 24, minWidth: 24, borderRadius: "100%" }} src={"https://www.google.com/s2/favicons?domain=" + new URL(props.data.url)} onError={() => { setErrorLoadingImage(true) }} className="z-10 relative" />
                             <img src={"https://www.google.com/s2/favicons?domain=" + new URL(props.data.url)} onError={() => { setErrorLoadingImage(true) }} className="absolute w-full top-0 left-0 z-0 rounded-md blur-md" />
                         </div>
                     }
@@ -41,21 +42,7 @@ export default function PasswordCard(props: { data: PasswordData, requestEdit(da
                         </div>
                     </div>
                 </div>
-                <div className="flex justify-center items-center gap-2.5">
-                    {
-                        !showpass
-                            ? <Eye onClick={() => { setShowpass(true) }} size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
-                            : <EyeOff onClick={() => { setShowpass(false) }} size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
-                    }
-                    <Copy onClick={() => { copyToClipBoard(props.data.password) }} size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger><EllipsisVertical size={18} className="cursor-pointer p-1 box-content hover:bg-muted-foreground/50 rounded-md duration-300 transition-all" /></DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => { props.requestEdit(props.data) }} variant="default">Modify</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { props.requestDelete(props.data) }} variant="destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                <Button variant="default" className="cursor-pointer" onClick={() => { props.requestRecover(props.data) }}>Recover</Button>
             </CardContent>
         </Card>
     )
