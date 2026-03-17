@@ -11,6 +11,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CreateStorage, GetStorage, isExist } from '@/lib/storage';
 import { Input } from '@/components/ui/input';
+import CheckPasswordCard from '@/components/CheckPasswordCard';
+import CreatePasswordCard from '@/components/CreatePasswordCard';
 
 const GOOD_TEST_KEY = 'testtest'
 const BAD_TEST_KEY = 'testtestfsdgfsddgfgfsddfsg'
@@ -24,23 +26,23 @@ const SCREEN_OPTIONS = {
 export default function Screen() {
   const [value, setValue] = useState('password')
   const cards = Array.from({ length: 15 })
+  const [isStorageChecked, setIsStorageChecked] = useState<boolean>(false)
   const [isStorageExist, setIsStorageExist] = useState<boolean>(false)
-  const [MastrePass, setMasterPass] = useState<string>("")
 
   useEffect(() => {
-    setIsStorageExist(false)
+    setIsStorageChecked(false)
+    setIsStorageExist(isExist())
   }, [])
 
-  if (!isStorageExist) {
+  if (!isStorageChecked) {
     return <>
       <Stack.Screen options={SCREEN_OPTIONS} />
-      <View className='flex-1 w-full p-4 pt-20'>
-        <Card>
-          <CardContent>
-            <Input secureTextEntry placeholder='Your master password' value={MastrePass} onChangeText={setMasterPass} />
-            <Button variant="default" onPress={async () => { setIsStorageExist(await GetStorage(MastrePass)) }} ><Text>Unlock password</Text></Button>
-          </CardContent>
-        </Card>
+      <View className='flex-1 justify-center w-full p-4 pt-20'>
+        {
+          isStorageExist
+            ? <CheckPasswordCard PasswordChecked={() => { setIsStorageChecked(true) }} />
+            : <CreatePasswordCard PasswordCreated={() => { setIsStorageExist(true) }} />
+        }
       </View>
     </>
   }
