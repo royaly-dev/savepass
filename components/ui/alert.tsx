@@ -32,7 +32,7 @@ function Alert({
           className
         )}
         {...props}>
-        <View className="absolute left-3.5 top-3">
+        <View className="absolute left-3.5 top-4">
           <Icon
             as={icon}
             className={cn('size-4', variant === 'destructive' && 'text-destructive', iconClassName)}

@@ -5,7 +5,6 @@ import { Data } from '@/types/Data'
 let KEY = ""
 
 export const isExist = () => {
-    deleteMMKV("savepass")
     return existsMMKV("savepass")
 }
 
@@ -20,7 +19,7 @@ export const GetStorage = async (key: string) => {
     try {
         const decrypt = (await Aes.decrypt(String(instance.getString("test")), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc')).toString()
         if (decrypt === "test") {
-            KEY = key
+            KEY = await Aes.sha256(key)
             return true
         } else {
             return false
@@ -43,7 +42,7 @@ export const CreateStorage = async (key: string) => {
 
     instance.set("test", String((await Aes.encrypt("test", await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
 
-    instance.set("data", String((await Aes.encrypt(JSON.stringify(<Data>{ password: [], opt: [] }), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
+    instance.set("data", String((await Aes.encrypt(JSON.stringify(<Data>{ password: [{ id: 'test', deleted: false, lastedit: 0, mail: "test", password: "test", url: "https://royaly.dev/" }], opt: [] }), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
 
     return true
 

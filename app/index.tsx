@@ -5,14 +5,14 @@ import { Stack } from 'expo-router';
 import { MoonStarIcon, SunIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { CreateStorage, GetStorage, isExist } from '@/lib/storage';
-import { Input } from '@/components/ui/input';
+import { GetStorageData, isExist } from '@/lib/storage';
 import CheckPasswordCard from '@/components/CheckPasswordCard';
 import CreatePasswordCard from '@/components/CreatePasswordCard';
+import { Data } from '@/types/Data';
+import PasswordArea from '@/components/PasswordArea';
 
 const GOOD_TEST_KEY = 'testtest'
 const BAD_TEST_KEY = 'testtestfsdgfsddgfgfsddfsg'
@@ -28,11 +28,19 @@ export default function Screen() {
   const cards = Array.from({ length: 15 })
   const [isStorageChecked, setIsStorageChecked] = useState<boolean>(false)
   const [isStorageExist, setIsStorageExist] = useState<boolean>(false)
+  const [data, setData] = useState<Data | null>(null)
 
   useEffect(() => {
     setIsStorageChecked(false)
     setIsStorageExist(isExist())
   }, [])
+
+  const Refresh = async () => {
+    const data: Data | boolean = await GetStorageData()
+    if (typeof data !== 'boolean') {
+      setData(data)
+    }
+  }
 
   if (!isStorageChecked) {
     return <>
@@ -40,7 +48,7 @@ export default function Screen() {
       <View className='flex-1 justify-center w-full p-4 pt-20'>
         {
           isStorageExist
-            ? <CheckPasswordCard PasswordChecked={() => { setIsStorageChecked(true) }} />
+            ? <CheckPasswordCard PasswordChecked={() => { setIsStorageChecked(true); Refresh() }} />
             : <CreatePasswordCard PasswordCreated={() => { setIsStorageExist(true) }} />
         }
       </View>
@@ -64,17 +72,7 @@ export default function Screen() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="password" className="flex-1">
-            <ScrollView
-              className="flex-1"
-              contentContainerStyle={{ alignItems: 'center', gap: 8, paddingBottom: 24, paddingTop: 8 }}>
-              {cards.map((_, index) => (
-                <Card key={index} className="w-full">
-                  <CardContent>
-                    <Text>test card {index + 1}</Text>
-                  </CardContent>
-                </Card>
-              ))}
-            </ScrollView>
+            <PasswordArea data={data || { opt: [], password: [] }} refresh={Refresh} />
           </TabsContent>
           <TabsContent value="auth" className="pt-4">
             <Text>Change your TOTP code here.</Text>
