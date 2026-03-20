@@ -70,8 +70,8 @@ export default function PasswordArea({ data, refresh }: { data: Data, refresh():
             <ScrollView className="flex-1" contentContainerClassName="gap-2">
                 {data?.password.map((item, index) => (
                     SelectValueSearch?.value === "web"
-                        ? item.url.includes(SearchInput) && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
-                        : item.mail.includes(SearchInput) && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
+                        ? item.url.includes(SearchInput) && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
+                        : item.mail.includes(SearchInput) && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
                 ))}
             </ScrollView>
             <ManagePassword mode={editData?.id ? "modifiy" : "add"} editData={editData} edit={editData?.id ? true : false} open={modalOpen} modalClose={onModalClose} />

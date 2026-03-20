@@ -13,6 +13,7 @@ import CheckPasswordCard from '@/components/CheckPasswordCard';
 import CreatePasswordCard from '@/components/CreatePasswordCard';
 import { Data } from '@/types/Data';
 import PasswordArea from '@/components/PasswordArea';
+import TOTPArea from '@/components/TOTPArea';
 
 const GOOD_TEST_KEY = 'testtest'
 const BAD_TEST_KEY = 'testtestfsdgfsddgfgfsddfsg'
@@ -74,8 +75,8 @@ export default function Screen() {
           <TabsContent value="password" className="flex-1">
             <PasswordArea data={data || { opt: [], password: [] }} refresh={Refresh} />
           </TabsContent>
-          <TabsContent value="auth" className="pt-4">
-            <Text>Change your TOTP code here.</Text>
+          <TabsContent value="auth" className="flex-1 pt-4">
+            <TOTPArea data={data || { opt: [], password: [] }} refresh={Refresh} />
           </TabsContent>
           <TabsContent value="settings" className="pt-4">
             <Text>Change your setting here.</Text>
