@@ -2,7 +2,7 @@ import { PasswordData } from "@/types/Data"
 import { Card, CardContent } from "./ui/card"
 import { ArrowUpRight, Copy, EllipsisVertical, Eye, EyeOff, Globe } from "lucide-react-native"
 import { useState } from "react"
-import { Image, Pressable, View } from "react-native"
+import { Image, Pressable, TouchableOpacity, View } from "react-native"
 import { useColorScheme } from 'nativewind';
 import {
     DropdownMenu,
@@ -13,6 +13,8 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { Text } from './ui/text';
+import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
 
 export default function PassowrdCard({ data, requestDelete, requestEdit }: { data: PasswordData, requestEdit(data: PasswordData): void, requestDelete(data: PasswordData): void }) {
 
@@ -21,11 +23,11 @@ export default function PassowrdCard({ data, requestDelete, requestEdit }: { dat
     const { colorScheme, toggleColorScheme } = useColorScheme();
 
     const openLink = (url: string) => {
-
+        Linking.openURL(url)
     }
 
-    const copyToClipBoard = (text: string) => {
-
+    const copyToClipBoard = async (text: string) => {
+        await Clipboard.setStringAsync(text)
     }
 
     return (
@@ -39,12 +41,10 @@ export default function PassowrdCard({ data, requestDelete, requestEdit }: { dat
                         </View>
                     }
                     <View className="flex justify-center items-start flex-col">
-                        <Pressable onPress={() => { openLink(data.url) }}>
-                            <View className="flex justify-center items-center flex-row group cursor-pointer">
-                                <Text>{new URL(data.url).host}</Text>
-                                <ArrowUpRight color={colorScheme === "dark" ? "#fff" : "#000"} className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
-                            </View>
-                        </Pressable>
+                        <View className="flex justify-center items-center flex-row group cursor-pointer">
+                            <Text onPress={() => { openLink(data.url) }}>{new URL(data.url).host}</Text>
+                            <ArrowUpRight onPress={() => { openLink(data.url) }} color={colorScheme === "dark" ? "#fff" : "#000"} className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
+                        </View>
                         <View className="text-muted-foreground flex justify-center flex-row items-center gap-1">
                             <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 20 ? data.mail.slice(0, 18) + "..." : data.mail}</Text>
                             <Text onPress={() => { copyToClipBoard(data.password) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">

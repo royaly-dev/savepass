@@ -21,7 +21,6 @@ import { getRemainingTime } from "@otplib/totp";
 export default function TOTPArea({ data, refresh }: { data: Data, refresh(): void }) {
     const [SelectValueSearch, setSelectValueSearch] = useState<Option>({ label: "Site", value: "web" })
     const [SearchInput, setSearchInput] = useState<string>("")
-    const [editData, setEditData] = useState<OptData | null>(null)
     const [modalOpen, setModalOpen] = useState<boolean>(false)
     const [RemainingTime, setRemainingTime] = useState<number>(30)
     const [TOTPcode, setTOTPcode] = useState<OptData[] | null>([])
@@ -31,7 +30,6 @@ export default function TOTPArea({ data, refresh }: { data: Data, refresh(): voi
     }, [data])
 
     const genTOTP = async () => {
-        console.log("render")
         const remaing = getRemainingTime()
         setRemainingTime(remaing)
         const codes: OptData[] = []
@@ -39,7 +37,6 @@ export default function TOTPArea({ data, refresh }: { data: Data, refresh(): voi
             codes.push({ ...TOTPData, key: await generate({ secret: TOTPData.key }) })
         }
         setTOTPcode(codes)
-        console.log(remaing)
         setTimeout(() => {
             genTOTP()
         }, remaing * 1000);
@@ -48,28 +45,17 @@ export default function TOTPArea({ data, refresh }: { data: Data, refresh(): voi
 
     const onModalClose = async (Modaldata: OptData, confirm: boolean) => {
         setModalOpen(false)
-        console.log(Modaldata)
-        console.log(data.opt)
         if (confirm) {
-            if (editData?.id) {
-                const index = data.opt.findIndex(item => item.id === Modaldata.id)
-                if (index !== -1) {
-                    data.opt[index] = Modaldata
-                    await SaveStorageData(data)
-                }
-            } else {
-                data.opt.push(Modaldata)
-                await SaveStorageData(data)
-            }
+            data.opt.push(Modaldata)
+            await SaveStorageData(data)
             refresh()
         }
-        setEditData(null)
     }
 
     const RequestDelete = async (DeleteData: OptData) => {
         const index = data.opt.findIndex(item => item.id === DeleteData.id)
         if (index !== -1) {
-            data.opt[index] = { ...DeleteData, deleted: true }
+            data.opt[index] = { ...DeleteData, deleted: true, key: data.opt[index].key }
             await SaveStorageData(data)
             refresh()
         }
@@ -101,7 +87,7 @@ export default function TOTPArea({ data, refresh }: { data: Data, refresh(): voi
                     )
                 })}
             </ScrollView>
-            <ManageTOTP mode={editData?.id ? "modifiy" : "add"} open={modalOpen} modalClose={onModalClose} />
+            <ManageTOTP open={modalOpen} modalClose={onModalClose} />
         </View>
     )
 }

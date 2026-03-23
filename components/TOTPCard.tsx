@@ -14,6 +14,7 @@ import {
 } from "./ui/dropdown-menu"
 import { Text } from './ui/text';
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
+import * as Clipboard from 'expo-clipboard';
 
 export default function TOTPCard({ data, requestDelete, time }: { data: OptData, time: number, requestDelete(data: OptData): void }) {
 
@@ -22,10 +23,10 @@ export default function TOTPCard({ data, requestDelete, time }: { data: OptData,
 
     useEffect(() => {
         setKey(prev => prev + 1)
-    }, [time])
+    }, [data])
 
-    const copyToClipBoard = (text: string) => {
-
+    const copyToClipBoard = async (text: string) => {
+        await Clipboard.setStringAsync(text)
     }
 
     return (

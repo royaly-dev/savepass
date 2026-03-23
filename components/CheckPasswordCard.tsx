@@ -13,7 +13,6 @@ export default function CheckPasswordCard({ PasswordChecked }: { PasswordChecked
 
     const CheckPassword = async () => {
         const storage = await GetStorage(MastrePass)
-        console.log(storage)
         if (storage) {
             PasswordChecked()
         }

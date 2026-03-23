@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "expo": "~54.0.29",
     "expo-camera": "~17.0.10",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.12",
     "expo-linking": "~8.0.10",
     "expo-router": "~6.0.19",

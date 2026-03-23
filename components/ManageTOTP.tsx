@@ -11,8 +11,9 @@ import { AlertCircle } from "lucide-react-native";
 import { Text } from "./ui/text";
 import Svg, { Path } from "react-native-svg"
 import { CameraView, useCameraPermissions } from 'expo-camera'
+import { generate } from "otplib";
 
-export default function ManageTOTP({ mode, open, modalClose }: { mode: "add" | "modifiy", open: boolean, modalClose(data: OptData, confirm: boolean): void }) {
+export default function ManageTOTP({ open, modalClose }: { open: boolean, modalClose(data: OptData, confirm: boolean): void }) {
 
     const [totpcode, setTotpcode] = useState<OptData | null>(null)
     const [ErrorMsg, setErrorMsg] = useState<string>("")
@@ -45,6 +46,13 @@ export default function ManageTOTP({ mode, open, modalClose }: { mode: "add" | "
 
             if (!totpcode.key) {
                 setErrorMsg("You need to provide a TOTP key !")
+                return
+            }
+
+            try {
+                await generate({ secret: totpcode.key })
+            } catch (error) {
+                setErrorMsg("You need to provide a valid TOTP key !")
                 return
             }
 
