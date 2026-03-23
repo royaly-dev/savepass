@@ -14,9 +14,8 @@ import CreatePasswordCard from '@/components/CreatePasswordCard';
 import { Data } from '@/types/Data';
 import PasswordArea from '@/components/PasswordArea';
 import TOTPArea from '@/components/TOTPArea';
-
-const GOOD_TEST_KEY = 'testtest'
-const BAD_TEST_KEY = 'testtestfsdgfsddgfgfsddfsg'
+import SettingsArea from '@/components/SettingsArea';
+import Zeroconf, { Service } from 'react-native-zeroconf'
 
 const SCREEN_OPTIONS = {
   title: 'SavePass Mobile',
@@ -26,14 +25,30 @@ const SCREEN_OPTIONS = {
 
 export default function Screen() {
   const [value, setValue] = useState('password')
-  const cards = Array.from({ length: 15 })
   const [isStorageChecked, setIsStorageChecked] = useState<boolean>(false)
   const [isStorageExist, setIsStorageExist] = useState<boolean>(false)
   const [data, setData] = useState<Data | null>(null)
+  const [services, setServices] = useState<Set<Service> | null>(null)
+
+  const instance = new Zeroconf()
+
+  instance.on('resolved', service => {
+    console.log(service)
+    if (service.name.split("_")[1] === "savepass") {
+      console.log("adding newdevice")
+      console.log(services)
+      setServices(prev => {
+        const newSet = prev ? new Set(prev) : new Set<Service>()
+        newSet.add(service)
+        return newSet
+      })
+    }
+  })
 
   useEffect(() => {
     setIsStorageChecked(false)
     setIsStorageExist(isExist())
+    instance.scan("http", "tcp", ".local")
   }, [])
 
   const Refresh = async () => {
@@ -79,7 +94,7 @@ export default function Screen() {
             <TOTPArea data={data || { opt: [], password: [] }} refresh={Refresh} />
           </TabsContent>
           <TabsContent value="settings" className="pt-4">
-            <Text>Change your setting here.</Text>
+            <SettingsArea scanedDevice={services || new Set<Service>()} />
           </TabsContent>
         </Tabs>
       </View>

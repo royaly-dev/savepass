@@ -1,6 +1,7 @@
 import { createMMKV, deleteMMKV, existsMMKV } from 'react-native-mmkv'
 import Aes from 'react-native-aes-crypto'
-import { Data } from '@/types/Data'
+import { Data, syncDevice } from '@/types/Data'
+import { getDeviceName } from 'react-native-device-info'
 
 let KEY = ""
 
@@ -44,6 +45,8 @@ export const CreateStorage = async (key: string) => {
 
     instance.set("data", String((await Aes.encrypt(JSON.stringify(<Data>{ password: [{ id: 'test', deleted: false, lastedit: 0, mail: "test", password: "test", url: "https://royaly.dev/" }], opt: [] }), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
 
+    instance.set("sync", String(JSON.stringify(<syncDevice>{ lastSync: 0, syncKey: await Aes.randomUuid(), status: false, data: [] })))
+
     return true
 
 }
@@ -76,4 +79,34 @@ export const GetStorageData = async () => {
     })
 
     return <Data>JSON.parse(String((await Aes.decrypt(String(instance.getString("data")), KEY, String(instance.getString("iv")), 'aes-256-cbc'))))
+}
+
+export const GetSyncData = async (): Promise<syncDevice | false> => {
+    if (!KEY || KEY.length < 1) {
+        return false
+    }
+
+    const instance = createMMKV({
+        id: "savepass",
+        mode: "multi-process",
+        readOnly: false,
+    })
+
+    return <syncDevice>JSON.parse(String(instance.getString("sync")))
+}
+
+export const SetSyncData = async (data: syncDevice) => {
+    if (!KEY || KEY.length < 1) {
+        return false
+    }
+
+    const instance = createMMKV({
+        id: "savepass",
+        mode: "multi-process",
+        readOnly: false,
+    })
+
+    instance.set("sync", String(JSON.stringify(data)))
+
+    return true
 }

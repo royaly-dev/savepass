@@ -9,7 +9,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { ScrollView, Text, View } from "react-native"
+import { ScrollView, View } from "react-native"
+import { Text } from '@/components/ui/text';
 import { Input } from "./ui/input"
 import PassowrdCard from "./PasswordCard"
 import { Data, PasswordData } from "@/types/Data"
