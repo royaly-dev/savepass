@@ -10,16 +10,18 @@ import SyncModal from "./SyncModal"
 export default function SettingsArea({ scanedDevice }: { scanedDevice: Set<Service> }) {
 
     const [SyncData, setSyncData] = useState<syncDevice | null>(null)
+    const [syncModalOpen, setSyncModalOpen] = useState<boolean>(false)
 
     useEffect(() => {
-        const getsync = async () => {
-            const tempsync = await GetSyncData()
-            if (typeof tempsync !== "boolean") {
-                setSyncData(tempsync)
-            }
-        }
         getsync()
     }, [])
+
+    const getsync = async () => {
+        const tempsync = await GetSyncData()
+        if (typeof tempsync !== "boolean") {
+            setSyncData(tempsync)
+        }
+    }
 
     return (
         <View className="gap-2">
@@ -28,13 +30,13 @@ export default function SettingsArea({ scanedDevice }: { scanedDevice: Set<Servi
                 <Button variant="default" className="flex-1"><Text className="text-white dark:text-black">Import</Text></Button>
                 <Button variant="default" className="flex-1"><Text className="text-white dark:text-black">Export</Text></Button>
             </View>
-            <Button variant="default"><Text className="text-white dark:text-black">{SyncData && SyncData?.data.length > 0 ? "Manage Sync" : "Setup Sync"}</Text></Button>
+            <Button onPress={() => { setSyncModalOpen(true) }} variant="default"><Text className="text-white dark:text-black">{SyncData && SyncData?.data.length > 0 ? "Manage Sync" : "Setup Sync"}</Text></Button>
             <View className="w-full gap-1">
                 <Text className="dark:text-white">Status : {SyncData?.status ? "Enabled" : "Disabled"}</Text>
                 <Text className="dark:text-white">Last sycn : {new Date(Number(SyncData?.lastSync)).toLocaleDateString()}</Text>
                 <Text className="dark:text-white">connected device : {SyncData?.data.length}</Text>
             </View>
-            <SyncModal open data={SyncData || { data: [], lastSync: 0, status: false, syncKey: "test" }} scanedDevice={scanedDevice} />
+            <SyncModal open={syncModalOpen} onchange={setSyncModalOpen} data={SyncData || { data: [], lastSync: 0, status: false, syncKey: "test" }} scanedDevice={scanedDevice} refreshData={getsync} />
         </View>
     )
 }

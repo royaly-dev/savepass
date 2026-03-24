@@ -8,10 +8,10 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState, useEffect } from 'react';
-import { GetStorageData, isExist } from '@/lib/storage';
+import { GetStorageData, GetSyncData, isExist, SaveStorageData, SetSyncData } from '@/lib/storage';
 import CheckPasswordCard from '@/components/CheckPasswordCard';
 import CreatePasswordCard from '@/components/CreatePasswordCard';
-import { Data } from '@/types/Data';
+import { Data, syncDevice } from '@/types/Data';
 import PasswordArea from '@/components/PasswordArea';
 import TOTPArea from '@/components/TOTPArea';
 import SettingsArea from '@/components/SettingsArea';
@@ -32,14 +32,17 @@ export default function Screen() {
 
   const instance = new Zeroconf()
 
+  instance.on("found", services => {
+  })
   instance.on('resolved', service => {
-    console.log(service)
     if (service.name.split("_")[1] === "savepass") {
       console.log("adding newdevice")
-      console.log(services)
       setServices(prev => {
         const newSet = prev ? new Set(prev) : new Set<Service>()
-        newSet.add(service)
+        const isExist: boolean = Array.from(newSet).filter(item => item.name === service.name).length > 0
+        if (!isExist) {
+          newSet.add(service)
+        }
         return newSet
       })
     }
@@ -48,7 +51,7 @@ export default function Screen() {
   useEffect(() => {
     setIsStorageChecked(false)
     setIsStorageExist(isExist())
-    instance.scan("http", "tcp", ".local")
+    instance.scan("http", "tcp", "local.")
   }, [])
 
   const Refresh = async () => {
@@ -58,13 +61,40 @@ export default function Screen() {
     }
   }
 
+  const syncDevices = async () => {
+    const Devicesdata: syncDevice = await GetSyncData() || { data: [], lastSync: 0, status: false, syncKey: "" }
+    for (const device of Devicesdata.data) {
+      const ip = Array.from(services || new Set<Service>).filter(item => item.name.split("_")[item.name.split("_").length - 1] === device.syncKey)[0]?.addresses[0]
+      if (ip) {
+        try {
+          const req = await fetch("http://" + ip + ":5263/sync", {
+            method: 'POST',
+            body: JSON.stringify({
+              data: await GetStorageData(),
+              syncKey: Devicesdata.syncKey
+            })
+          })
+          if (req.status === 200) {
+            const reqJSON = await req.json()
+            await SaveStorageData(reqJSON.data)
+            Refresh()
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
+    Devicesdata.lastSync = Date.now()
+    await SetSyncData(Devicesdata)
+  }
+
   if (!isStorageChecked) {
     return <>
       <Stack.Screen options={SCREEN_OPTIONS} />
       <View className='flex-1 justify-center w-full p-4 pt-20'>
         {
           isStorageExist
-            ? <CheckPasswordCard PasswordChecked={() => { setIsStorageChecked(true); Refresh() }} />
+            ? <CheckPasswordCard PasswordChecked={async () => { setIsStorageChecked(true); await Refresh(); setTimeout(() => { syncDevices() }, 500); }} />
             : <CreatePasswordCard PasswordCreated={() => { setIsStorageExist(true) }} />
         }
       </View>

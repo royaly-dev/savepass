@@ -42,14 +42,14 @@ export default function PassowrdCard({ data, requestDelete, requestEdit }: { dat
                     }
                     <View className="flex justify-center items-start flex-col">
                         <View className="flex justify-center items-center flex-row group cursor-pointer">
-                            <Text onPress={() => { openLink(data.url) }}>{new URL(data.url).host}</Text>
+                            <Text onPress={() => { openLink(data.url) }}>{new URL(data.url).host.length > 15 ? new URL(data.url).host.slice(0, 15) + "..." : new URL(data.url).host}</Text>
                             <ArrowUpRight onPress={() => { openLink(data.url) }} color={colorScheme === "dark" ? "#fff" : "#000"} className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
                         </View>
                         <View className="text-muted-foreground flex justify-center flex-row items-center gap-1">
-                            <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 20 ? data.mail.slice(0, 18) + "..." : data.mail}</Text>
+                            <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 10 ? data.mail.slice(0, 7) + "..." : data.mail}</Text>
                             <Text onPress={() => { copyToClipBoard(data.password) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">
                                 {showpass
-                                    ? data.password.length > 20 ? data.password.slice(0, 18) + "..." : data.password
+                                    ? data.password.length > 10 ? data.password.slice(0, 7) + "..." : data.password
                                     : "********"}
                             </Text>
                         </View>

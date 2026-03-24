@@ -1,7 +1,6 @@
 import { createMMKV, deleteMMKV, existsMMKV } from 'react-native-mmkv'
 import Aes from 'react-native-aes-crypto'
 import { Data, syncDevice } from '@/types/Data'
-import { getDeviceName } from 'react-native-device-info'
 
 let KEY = ""
 

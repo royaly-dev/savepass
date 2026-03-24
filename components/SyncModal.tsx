@@ -4,18 +4,22 @@ import { syncData, syncDevice } from "@/types/Data";
 import Carousel, { ICarouselInstance } from "react-native-reanimated-carousel";
 import { useWindowDimensions, View } from "react-native";
 import { Text } from '@/components/ui/text';
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Check, MonitorSmartphoneIcon } from "lucide-react-native";
+import { AlertCircleIcon, Check, MonitorSmartphoneIcon } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
+import { SetSyncData } from "@/lib/storage";
+import { getDeviceName } from 'react-native-device-info'
+import { Alert, AlertDescription } from "./ui/alert";
 
 
-export default function SyncModal({ scanedDevice, data, open }: { scanedDevice: Set<Service>, data: syncDevice, open: boolean }) {
+export default function SyncModal({ scanedDevice, data, open, refreshData, onchange }: { scanedDevice: Set<Service>, data: syncDevice, open: boolean, refreshData(): void, onchange(value: boolean): void }) {
 
     const { width } = useWindowDimensions()
     const CarouselRef = useRef<ICarouselInstance>(null)
     const { colorScheme } = useColorScheme();
+    const [ErrorMsg, setErrorMsg] = useState<string>("")
 
     useEffect(() => {
         if (CarouselRef) {
@@ -31,21 +35,80 @@ export default function SyncModal({ scanedDevice, data, open }: { scanedDevice: 
         }
     }
 
-    const addDevice = (data: Service) => {
-
+    const addDevice = async (dataAdd: Service) => {
+        setErrorMsg("")
+        const device = dataAdd.name.split("_")
+        if (data.data.findIndex(item => item.syncKey === device[device.length - 1]) !== -1) {
+            console.log("already added")
+        } else {
+            try {
+                const req = await fetch("http://" + dataAdd.addresses[0] + ":5263/setupSync", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        name: await getDeviceName(),
+                        syncKey: data.syncKey
+                    })
+                })
+                if (req.status !== 200) {
+                    throw new Error("error")
+                }
+            } catch (error) {
+                console.log(error)
+                setErrorMsg("The device is not reachable, check your firewall rules !")
+                return
+            }
+            data.data.push({ lastSync: Date.now(), name: device[0], syncKey: device[device.length - 1] })
+            data.status = data.data.length > 0
+            await SetSyncData(data)
+        }
+        if (CarouselRef) {
+            CarouselRef.current?.next()
+        }
+        refreshData()
     }
 
-    const removeDevice = (data: syncData) => {
+    const removeDevice = async (dataRemove: syncData) => {
+        const index = data.data.findIndex(item => item.syncKey === dataRemove.syncKey)
 
+        if (index !== -1) {
+            data.data = data.data.filter(item => item.syncKey !== dataRemove.syncKey)
+        }
+
+        const ip: string = Array.from(scanedDevice).filter(item => item.name.split("_")[item.name.split("_").length - 1] === dataRemove.syncKey)[0]?.addresses[0]
+
+        try {
+            if (ip) {
+                fetch("http://" + ip + ":5263/removeSync", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        syncKey: data.syncKey,
+                        name: await getDeviceName()
+                    })
+                })
+            }
+        } catch (error) {
+        }
+
+        data.status = data.data.length > 0
+
+        await SetSyncData(data)
+        refreshData()
     }
 
     return (
-        <Dialog open={open}>
+        <Dialog onOpenChange={onchange} open={open}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{data.data.length > 0 ? "Manage Sync" : "Setup Sync"}</DialogTitle>
+                    {
+                        ErrorMsg && (
+                            <Alert icon={AlertCircleIcon}>
+                                <AlertDescription>{ErrorMsg}</AlertDescription>
+                            </Alert>
+                        )
+                    }
                 </DialogHeader>
-                <Carousel loop={false} ref={CarouselRef} data={[{ id: 'manage' }, { id: 'info' }, { id: 'add' }, { id: "confirm" }]} renderItem={({ item }) => (
+                <Carousel enabled={false} loop={false} ref={CarouselRef} data={[{ id: 'manage' }, { id: 'info' }, { id: 'add' }, { id: "confirm" }]} renderItem={({ item }) => (
                     <View className="flex-1">
                         {
                             item.id === "manage"
@@ -55,11 +118,11 @@ export default function SyncModal({ scanedDevice, data, open }: { scanedDevice: 
                                         <Text className="text-base">Manage Devices</Text>
                                         <Button variant="default" onPress={next}><Text>Add new device</Text></Button>
                                     </View>
-                                    <View className="flex-1 gap-2">
+                                    <View className="flex-1 gap-2 mt-4">
                                         {
                                             data.data.length > 0 ?
                                                 data.data.map(item => (
-                                                    <Card key={item.syncKey} className="justify-between items-center flex-row w-full">
+                                                    <Card key={item.syncKey} className="justify-between items-center flex-row w-full p-2" style={{ width: '100%' }}>
                                                         <View className="flex-row gap-2">
                                                             <MonitorSmartphoneIcon color={colorScheme === 'dark' ? '#fff' : '#000'} />
                                                             <Text>{item.name}</Text>

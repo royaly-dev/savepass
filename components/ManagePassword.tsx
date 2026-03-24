@@ -47,6 +47,10 @@ export default function ManagePassword({ mode, edit, editData, open, modalClose 
                 return
             }
 
+            if (edit) {
+                password.lastedit = Date.now()
+            }
+
             modalClose(password, true)
 
         }

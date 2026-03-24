@@ -35,7 +35,11 @@ export default function TOTPArea({ data, refresh }: { data: Data, refresh(): voi
         setRemainingTime(remaing)
         const codes: OptData[] = []
         for (const TOTPData of data.opt) {
-            codes.push({ ...TOTPData, key: await generate({ secret: TOTPData.key }) })
+            try {
+                codes.push({ ...TOTPData, key: await generate({ secret: TOTPData.key }) })
+            } catch (error) {
+                codes.push({ ...TOTPData, key: "000000", provider: "invalid", name: "invalid" })
+            }
         }
         setTOTPcode(codes)
         setTimeout(() => {

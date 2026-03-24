@@ -45,7 +45,7 @@ export default function PasswordArea({ data, refresh }: { data: Data, refresh():
     const RequestDelete = async (DeleteData: PasswordData) => {
         const index = data.password.findIndex(item => item.id === DeleteData.id)
         if (index !== -1) {
-            data.password[index] = { ...DeleteData, deleted: true }
+            data.password[index] = { ...DeleteData, deleted: true, lastedit: Date.now() }
             await SaveStorageData(data)
             refresh()
         }
