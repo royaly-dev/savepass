@@ -8,6 +8,7 @@ import { Label } from './ui/label';
 import { View } from 'react-native';
 import { Alert, AlertTitle } from './ui/alert';
 import { AlertCircleIcon } from 'lucide-react-native';
+import PasswordInput from './PasswordInput';
 
 export default function CreatePasswordCard({ PasswordCreated }: { PasswordCreated(): void }) {
 
@@ -42,11 +43,15 @@ export default function CreatePasswordCard({ PasswordCreated }: { PasswordCreate
                     )
                 }
             </CardHeader>
-            <CardContent className='flex justify-center items-start flex-col w-full'>
+            <CardContent className='flex justify-center items-start flex-col w-full gap-4'>
                 <Label className='self-start' htmlFor='master' nativeID='master'><Text>Password :</Text></Label>
-                <Input className='mt-2 mb-3' id="master" secureTextEntry placeholder='Your master password' value={MastrePass} onChangeText={setMasterPass} />
+                <View className='relative flex justify-center items-center w-full'>
+                    <PasswordInput gen={false} id='master' onchange={setMasterPass} value={MastrePass} />
+                </View>
                 <Label className='self-start' htmlFor='mastercheck' nativeID='mastercheck'><Text>Repeat password :</Text></Label>
-                <Input className='mt-2 mb-5' id="mastercheck" secureTextEntry placeholder='Your master password' value={MastrePassCheck} onChangeText={setMasterPassCheck} />
+                <View className='relative flex justify-center items-center w-full'>
+                    <PasswordInput gen={false} id='mastercheck' onchange={setMasterPassCheck} value={MastrePassCheck} />
+                </View>
                 <Button className='w-full' variant="default" onPress={async () => { CreatePassword() }} ><Text>Create</Text></Button>
             </CardContent>
         </Card>

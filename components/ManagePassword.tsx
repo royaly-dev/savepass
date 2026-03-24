@@ -9,6 +9,7 @@ import { useWindowDimensions, View } from "react-native";
 import { Alert, AlertDescription } from "./ui/alert";
 import { AlertCircle } from "lucide-react-native";
 import { Text } from "./ui/text";
+import PasswordInput from "./PasswordInput";
 
 export default function ManagePassword({ mode, edit, editData, open, modalClose }: { mode: "add" | "modifiy", edit: boolean, editData?: PasswordData | null, open: boolean, modalClose(data: PasswordData, confirm: boolean): void }) {
 
@@ -80,7 +81,7 @@ export default function ManagePassword({ mode, edit, editData, open, modalClose 
 
                     <Label htmlFor="password" nativeID="password">Password</Label>
                     <View className='relative flex justify-center items-center w-full'>
-                        <Input secureTextEntry value={password.password} onChange={(e) => { setPassword({ ...password, password: e.nativeEvent.text }) }} id="password" placeholder="password" />
+                        <PasswordInput gen id="password" onchange={(text) => { setPassword({ ...password, password: text }) }} value={password.password} />
                     </View>
                     <Button onPress={savepassord} variant="default" className="w-full mt-4"><Text>Save</Text></Button>
                 </View>
