@@ -80,6 +80,10 @@ Here're some of the project's best features:
     apt install flatpak flatpak-builder rpm
     ```
 
+    ```bash
+    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    ```
+
     > **Note:** The flatpak, flatpak-builder and rpm packages is need to be installed in order to build the app.
     >
     >Also **you need** to install on flatpack these components : 
