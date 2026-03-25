@@ -47,7 +47,9 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
           "barcodeScannerEnabled": true
         }
-      ]
+      ],
+      "expo-document-picker",
+      "expo-file-system"
     ],
     "experiments": {
       "typedRoutes": true

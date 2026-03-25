@@ -124,7 +124,7 @@ export default function Screen() {
             <TOTPArea data={data || { opt: [], password: [] }} refresh={Refresh} />
           </TabsContent>
           <TabsContent value="settings" className="pt-4">
-            <SettingsArea scanedDevice={services || new Set<Service>()} />
+            <SettingsArea scanedDevice={services || new Set<Service>()} refresh={Refresh} data={data || { opt: [], password: [] }} />
           </TabsContent>
         </Tabs>
       </View>
