@@ -16,15 +16,15 @@ jobs:
         with:
           ref: savepass_mobile
 
+      - name: Setup env
+        run: npm ci && npx expo prebuild
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
           cache: "gradle"
-
-      - name: Setup env
-        run: npm ci && npx expo prebuild
 
       - name: Get version
         run: echo "APP_VERSION=v$(node -p "require('./package.json').version")" >> $GITHUB_ENV
