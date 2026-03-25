@@ -1,7 +1,7 @@
 name: Build Release
 on:
   push:
-    branches: [main]
+    branches: [savepass_mobile]
 
 permissions:
   contents: write
@@ -9,34 +9,31 @@ permissions:
 jobs:
   build-app:
     if: contains(github.event.head_commit.message, 'release')
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: [ubuntu-latest]
     steps:
       - name: Check out
         uses: actions/checkout@v1
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: 22.x
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
 
-      - name: Install Dependencies
-        run: npm ci
-        shell: bash
+      - name: Setup env
+        run: npm ci && npx expo prebuild
 
-      - name: Install flatpak and RPM
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y rpm flatpak flatpak-builder
-          flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          flatpak install -y org.freedesktop.Sdk//24.08 org.freedesktop.Platform//24.08 org.electronjs.Electron2.BaseApp//24.08
-        shell: bash
+      - name: Get version
+        run: echo "APP_VERSION=v$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Build
+        run: cd android/ && chmod +x ./gradlew && ./gradlew assembleRelease
+
+      - name: Upload
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.APP_VERSION }}
+          files: ./android/app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
-        shell: bash
