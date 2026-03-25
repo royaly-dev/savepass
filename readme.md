@@ -19,43 +19,11 @@ Here're some of the project's best features:
 *   Sync between devices (on the same network)
 *   Import / Export your data in a JSON file
 
-<h2>🛠️ Installation Steps ( for windows ):</h2>
+<h2>🖥️ Installation Steps :</h2>
 
 1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update
 
-2. Execute the installeur
-
-3. Let the onboarding process guide you
-
-4. enjoy the app !
-
-<h2>🛠️ Installation Steps ( for linux ):</h2>
-
-1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update
-
-2. Install on your system :
-
-    - Debian Based :
-
-        ```bash
-        dpkg -i savepass_linux_{arch}.deb
-        ```
-
-    - flatpak :
-    
-        ```bash
-        flatpak install savepass_linux_{arch}.flatpak
-        ```
-
-    - AppImage :
-
-        ```bash
-        chmod +x savepass_linux_{arch}.AppImage
-        ```
-
-        ```bash
-        ./savepass_linux_{arch}.AppImage
-        ```
+2. Execute the installer on your android device
 
 3. Let the onboarding process guide you
 
@@ -70,25 +38,31 @@ Here're some of the project's best features:
     git clone https://github.com/royaly-dev/savepass.git
     ```
 
-2. Then install dependency :
+2. Then change to the savepass_mobile branch :
 
     ```bash
-    npm install
+    git checkout savepass_mobile
     ```
 
+3. Install the dependencies :
     ```bash
-    apt install flatpak flatpak-builder rpm
+    npm i
     ```
 
-    > **Note:** The flatpak, flatpak-builder and rpm packages is need to be installed in order to build the app.
-    >
-    >Also **you need** to install on flatpack these components : 
-    flathub org.freedesktop.Sdk//24.08 - org.freedesktop.Platform//24.08 - org.electronjs.Electron2.BaseApp
+    > **Note:** To run and test the app you need to have android studio with vertual device, an installation guide can be found [Here.](https://developer.android.com/studio/install?hl=fr)
 
 3. Now you can build from source !
 
     ```bash
-    npm run make
+    npx expo prebuild
+    ```
+
+    ```bash
+    cd android/
+    ```
+
+    ```bash
+    ./gradlew assembleRelease
     ```
 
 <h2>✨ Credits</h2>
