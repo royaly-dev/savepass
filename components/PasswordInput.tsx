@@ -49,7 +49,7 @@ export default function PasswordInput({ value, onchange, gen, id, className }: {
     return (
         <>
             <Input value={value} onChange={(e) => { onchange(e.nativeEvent.text) }} id={id} nativeID={id} secureTextEntry={!showPassword} className={className} />
-            <View className="absolute flex-1 self-end flex-row px-4 gap-2">
+            <View className="absolute flex-1 self-end flex-row px-4 gap-2 elevation">
                 {
                     showPassword
                         ? <Icon as={EyeOff} onPress={() => { setShowPassword(false) }} className="bg-muted rounded-sm" size={22} />
