@@ -1,6 +1,6 @@
 import { PasswordData } from "@/types/Data"
 import { Card, CardContent } from "./ui/card"
-import { ArrowUpRight, Copy, EllipsisVertical, Eye, EyeOff, Globe } from "lucide-react-native"
+import { ArrowUpRight, Copy, EllipsisVertical, Eye, EyeOff, Globe, MailIcon, User2Icon } from "lucide-react-native"
 import { useState } from "react"
 import { Image, Pressable, TouchableOpacity, View } from "react-native"
 import { useColorScheme } from 'nativewind';
@@ -34,19 +34,37 @@ export default function PassowrdCard({ data, requestDelete, requestEdit }: { dat
         <Card key={data.id} className="w-full p-3">
             <CardContent className="flex justify-between items-center flex-row gap-2 px-0">
                 <View className="flex justify-center items-center flex-row gap-2">
-                    {errorLoadingImage
-                        ? <View className="p-3 box-content rounded-md relative overflow-hidden"><Globe size={32} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md" /></View>
-                        : <View className="p-3 box-content rounded-md relative overflow-hidden">
-                            <Image style={{ height: 32, width: 32, borderRadius: 8 }} src={"https://www.google.com/s2/favicons?domain=" + new URL(data.url)} onError={() => { setErrorLoadingImage(true) }} className="z-10 relative" />
-                        </View>
+                    {data.url && (
+                        errorLoadingImage
+                            ? <View className="p-3 box-content rounded-md relative overflow-hidden"><Globe size={32} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md" /></View>
+                            : <View className="p-3 box-content rounded-md relative overflow-hidden">
+                                <Image style={{ height: 32, width: 32, borderRadius: 8 }} src={"https://www.google.com/s2/favicons?domain=" + new URL(data.url)} onError={() => { setErrorLoadingImage(true) }} className="z-10 relative" />
+                            </View>
+                    )
+                    }
+                    {
+                        !data.url && (
+                            data.mail.toLowerCase().match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+                                ? <View className="p-3 box-content rounded-md relative overflow-hidden"><MailIcon size={32} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md" /></View>
+                                : <View className="p-3 box-content rounded-md relative overflow-hidden"><User2Icon size={32} color="#0769e1e8" className="p-3 box-content bg-[#0769e152] rounded-md" /></View>
+                        )
                     }
                     <View className="flex justify-center items-start flex-col">
                         <View className="flex justify-center items-center flex-row group cursor-pointer">
-                            <Text onPress={() => { openLink(data.url) }}>{new URL(data.url).host.length > 15 ? new URL(data.url).host.slice(0, 15) + "..." : new URL(data.url).host}</Text>
-                            <ArrowUpRight onPress={() => { openLink(data.url) }} color={colorScheme === "dark" ? "#fff" : "#000"} className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
+                            {
+                                data.url && (
+                                    <>
+                                        <Text onPress={() => { openLink(data.url) }}>{new URL(data.url).host.length > 15 ? new URL(data.url).host.slice(0, 15) + "..." : new URL(data.url).host}</Text>
+                                        <ArrowUpRight onPress={() => { openLink(data.url) }} color={colorScheme === "dark" ? "#fff" : "#000"} className="group-hover:scale-125 group-hover:-translate-y-0.5 transition-all duration-200" size={24} />
+                                    </>
+                                )
+                            }
+                            {
+                                !data.url && <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 20 ? data.mail.slice(0, 16) + "..." : data.mail}</Text>
+                            }
                         </View>
                         <View className="text-muted-foreground flex justify-center flex-row items-center gap-1">
-                            <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 10 ? data.mail.slice(0, 7) + "..." : data.mail}</Text>
+                            {data.url && <Text onPress={() => { copyToClipBoard(data.mail) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">{data.mail.length > 10 ? data.mail.slice(0, 7) + "..." : data.mail}</Text>}
                             <Text onPress={() => { copyToClipBoard(data.password) }} className="p-0.5 px-1 hover:bg-muted-foreground hover:text-white rounded-sm cursor-pointer transition-all duration-300">
                                 {showpass
                                     ? data.password.length > 10 ? data.password.slice(0, 7) + "..." : data.password

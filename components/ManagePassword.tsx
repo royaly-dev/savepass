@@ -31,11 +31,14 @@ export default function ManagePassword({ mode, edit, editData, open, modalClose 
     const savepassord = () => {
         setErrorMsg("")
         if (password) {
-            try {
-                const urlcheck = new URL(password?.url)
-            } catch (error) {
-                setErrorMsg("You need to provide a valid url like : https://exemple.com")
-                return
+
+            if (password.url) {
+                try {
+                    const urlcheck = new URL(password?.url)
+                } catch (error) {
+                    setErrorMsg("You need to provide a valid url like : https://exemple.com")
+                    return
+                }
             }
 
             if (!password.mail) {
@@ -73,7 +76,7 @@ export default function ManagePassword({ mode, edit, editData, open, modalClose 
                     }
                 </DialogHeader>
                 <View className="flex justify-center items-start flex-col gap-4">
-                    <Label htmlFor="url" nativeID="url">URL</Label>
+                    <Label htmlFor="url" nativeID="url">URL (optional)</Label>
                     <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.nativeEvent.text }) }} id="url" placeholder="https://exemple.com/" />
 
                     <Label htmlFor="mail" nativeID="mail">Email / Username</Label>

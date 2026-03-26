@@ -63,6 +63,7 @@ export default function PasswordArea({ data, refresh }: { data: Data, refresh():
                         <SelectGroup>
                             <SelectItem value="name" key={'name'} label={'Mail'} />
                             <SelectItem value="web" key={'web'} label={'Site'} />
+                            <SelectItem value="account" key={'account'} label={'Account'} />
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -72,7 +73,7 @@ export default function PasswordArea({ data, refresh }: { data: Data, refresh():
                 {data?.password.map((item, index) => (
                     SelectValueSearch?.value === "web"
                         ? item.url.includes(SearchInput) && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
-                        : item.mail.includes(SearchInput) && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
+                        : SelectValueSearch?.value === "account" ? item.mail.includes(SearchInput) && !item.url && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} /> : item.mail.includes(SearchInput) && !item.deleted && <PassowrdCard data={item} requestDelete={RequestDelete} requestEdit={(data) => { setModalOpen(true); setEditData(data) }} key={index} />
                 ))}
             </ScrollView>
             <ManagePassword mode={editData?.id ? "modifiy" : "add"} editData={editData} edit={editData?.id ? true : false} open={modalOpen} modalClose={onModalClose} />

@@ -5,7 +5,7 @@ import { useWindowDimensions, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Button } from "./ui/button";
 import { Text } from "./ui/text";
-import { Globe } from "lucide-react-native";
+import { Globe, User2Icon } from "lucide-react-native";
 import { SaveStorageData } from "@/lib/storage";
 
 export default function RecoverPassword({ data, refresh, open, onchange }: { open: boolean, data: Data, refresh(): void, onchange(value: boolean): void }) {
@@ -35,9 +35,17 @@ export default function RecoverPassword({ data, refresh, open, onchange }: { ope
                                     <CardContent className="flex-row justify-between items-center gap-2 px-0">
                                         <View className="flex-row justify-center items-center gap-2">
                                             <View className="p-3 box-content bg-[#0769e152] rounded-md">
-                                                <Globe size={24} color="#0769e1e8" />
+                                                {
+                                                    item.url
+                                                        ? <Globe size={24} color="#0769e1e8" />
+                                                        : <User2Icon size={24} color="#0769e1e8" />
+                                                }
                                             </View>
-                                            <Text className="text-base">{new URL(item.url).host.slice(0, 10)}</Text>
+                                            {
+                                                item.url
+                                                    ? <Text className="text-base">{new URL(item.url).host.slice(0, 10)}</Text>
+                                                    : <Text className="text-base">{item.mail.length > 15 ? item.mail.slice(0, 12) + "..." : item.mail}</Text>
+                                            }
                                         </View>
                                         <Button onPress={() => { recover(item) }} variant="default"><Text>Recover</Text></Button>
                                     </CardContent>
