@@ -5,7 +5,7 @@
   "description": "SavePass is a passwordManager where you can store and sync your password and TOTP code with your other devices",
   "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start",
+    "dev": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",

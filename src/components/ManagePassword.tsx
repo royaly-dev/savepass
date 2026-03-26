@@ -49,11 +49,13 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
 
     const savepassord = () => {
 
-        try {
-            const testurl = new URL(password.url);
-        } catch (error) {
-            toast.error("You need to provide a valid URl (ex: https://name.com/)")
-            return
+        if (password.url) {
+            try {
+                const testurl = new URL(password.url);
+            } catch (error) {
+                toast.error("You need to provide a valid URl (ex: https://name.com/)")
+                return
+            }
         }
 
         password.lastedit = Date.now()
@@ -86,7 +88,7 @@ export default function ManagePassword(props: { data: Data, updateData?: Passwor
                     <DialogTitle>{props.type == "add" ? "Add a new Password" : "Modify your password"}</DialogTitle>
                 </DialogHeader>
                 <div className="flex justify-center items-start flex-col gap-4">
-                    <Label htmlFor="url">URL</Label>
+                    <Label htmlFor="url">URL (optional)</Label>
                     <Input value={password.url} onChange={(e) => { setPassword({ ...password, url: e.currentTarget.value }) }} id="url" type="url" placeholder="https://exemple.com/"></Input>
 
                     <Label htmlFor="mail">Email / Username</Label>
