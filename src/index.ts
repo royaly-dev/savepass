@@ -156,7 +156,10 @@ const startSync = async () => {
             syncKey: syncKey,
             data: await JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
           })
-        }).then(async responce => JSON.parse(CryptoJS.AES.decrypt((await responce.text()), device.syncKey).toString(CryptoJS.enc.Utf8)))
+        }).then(async responce => {
+          const jsonBody = await responce.json()
+          return JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), device.syncKey).toString(CryptoJS.enc.Utf8))
+        })
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
