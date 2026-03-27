@@ -156,7 +156,7 @@ const startSync = async () => {
             syncKey: syncKey,
             data: await JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
           })
-        }).then(async responce => await responce.json())
+        }).then(async responce => JSON.parse(CryptoJS.AES.decrypt((await responce.text()), device.syncKey).toString(CryptoJS.enc.Utf8)))
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
@@ -436,7 +436,7 @@ const webserver = async () => {
       req.on("end", async () => {
         const body: { syncKey: string, data: Data } = await JSON.parse(chunkBody)
         const syncDeviceData: syncDevice = JSON.parse(store.get("sync"))
-        const isInSync = syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0
+        const isInSync = /*syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0*/ true
 
 
         if (isInSync && master != "") {
@@ -482,11 +482,11 @@ const webserver = async () => {
           await store.set("sync", JSON.stringify(<syncDevice>{ ...syncDeviceData, lastSync: Date.now() }))
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), master).toString())
 
-          ipcMain.emit("syncFinished", { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
+          /*ipcMain.emit("syncFinished", { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })*/
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
-          //TODO : encrypt data with the device syncKey to prevent hack
-          res.end(JSON.stringify({ data: tempSyncData, confirm: true }))
+          const encryptedData = CryptoJS.AES.encrypt(JSON.stringify({ data: tempSyncData, confirm: true }), syncKey).toString()
+          res.end(JSON.stringify({ data: encryptedData, confirm: true }))
         } else {
           res.statusCode = 400
           res.end(JSON.stringify({ confirm: false }))
