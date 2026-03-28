@@ -1,15 +1,16 @@
+import 'react-native-get-random-values'
 import { PasswordData } from "@/types/Data";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useEffect, useState } from "react";
-import Aes from 'react-native-aes-crypto'
 import { useWindowDimensions, View } from "react-native";
 import { Alert, AlertDescription } from "./ui/alert";
 import { AlertCircle } from "lucide-react-native";
 import { Text } from "./ui/text";
 import PasswordInput from "./PasswordInput";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function ManagePassword({ mode, edit, editData, open, modalClose }: { mode: "add" | "modifiy", edit: boolean, editData?: PasswordData | null, open: boolean, modalClose(data: PasswordData, confirm: boolean): void }) {
 
@@ -22,7 +23,7 @@ export default function ManagePassword({ mode, edit, editData, open, modalClose 
             if (edit && editData) {
                 setPassword(editData)
             } else {
-                setPassword({ id: await Aes.randomUuid(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
+                setPassword({ id: uuidv4(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
             }
         }
         password()

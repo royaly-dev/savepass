@@ -1,10 +1,10 @@
+import 'react-native-get-random-values'
 import { OptData } from "@/types/Data";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useEffect, useRef, useState } from "react";
-import Aes from 'react-native-aes-crypto'
 import { Modal, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { Alert, AlertDescription } from "./ui/alert";
 import { AlertCircle } from "lucide-react-native";
@@ -14,6 +14,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import { generate } from "otplib";
 import { useColorScheme } from 'nativewind';
 import PasswordInput from "./PasswordInput";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function ManageTOTP({ open, modalClose }: { open: boolean, modalClose(data: OptData, confirm: boolean): void }) {
 
@@ -28,7 +29,7 @@ export default function ManageTOTP({ open, modalClose }: { open: boolean, modalC
 
     useEffect(() => {
         const totp = async () => {
-            setTotpcode({ deleted: false, id: await Aes.randomUuid(), key: "", name: "", provider: "" })
+            setTotpcode({ deleted: false, id: uuidv4(), key: "", name: "", provider: "" })
         }
         totp()
     }, [open])

@@ -1,3 +1,4 @@
+import 'react-native-get-random-values'
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
@@ -16,6 +17,7 @@ import PasswordArea from '@/components/PasswordArea';
 import TOTPArea from '@/components/TOTPArea';
 import SettingsArea from '@/components/SettingsArea';
 import Zeroconf, { Service } from 'react-native-zeroconf'
+import CryptoJS from 'crypto-js';
 
 const SCREEN_OPTIONS = {
   title: 'SavePass Mobile',
@@ -54,7 +56,10 @@ export default function Screen() {
     instance.scan("http", "tcp", "local.")
   }, [])
 
-  const Refresh = async () => {
+  const Refresh = async (sync: boolean) => {
+    if (sync) {
+      syncDevices()
+    }
     const data: Data | boolean = await GetStorageData()
     if (typeof data !== 'boolean') {
       setData(data)
@@ -76,8 +81,9 @@ export default function Screen() {
           })
           if (req.status === 200) {
             const reqJSON = await req.json()
-            await SaveStorageData(reqJSON.data)
-            Refresh()
+            const decryptedData = JSON.parse(CryptoJS.AES.decrypt(reqJSON.data, device.syncKey).toString(CryptoJS.enc.Utf8))
+            await SaveStorageData(decryptedData.data)
+            Refresh(false)
           }
         } catch (error) {
           console.log(error)
@@ -94,7 +100,7 @@ export default function Screen() {
       <View className='flex-1 justify-center w-full p-4 pt-20'>
         {
           isStorageExist
-            ? <CheckPasswordCard PasswordChecked={async () => { setIsStorageChecked(true); await Refresh(); setTimeout(() => { syncDevices() }, 500); }} />
+            ? <CheckPasswordCard PasswordChecked={async () => { setIsStorageChecked(true); Refresh(true) }} />
             : <CreatePasswordCard PasswordCreated={() => { setIsStorageExist(true) }} />
         }
       </View>
@@ -118,13 +124,13 @@ export default function Screen() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="password" className="flex-1">
-            <PasswordArea data={data || { opt: [], password: [] }} refresh={Refresh} />
+            <PasswordArea data={data || { opt: [], password: [] }} refresh={() => { Refresh(true) }} />
           </TabsContent>
           <TabsContent value="auth" className="flex-1 pt-4">
-            <TOTPArea data={data || { opt: [], password: [] }} refresh={Refresh} />
+            <TOTPArea data={data || { opt: [], password: [] }} refresh={() => { Refresh(true) }} />
           </TabsContent>
           <TabsContent value="settings" className="pt-4">
-            <SettingsArea scanedDevice={services || new Set<Service>()} refresh={Refresh} data={data || { opt: [], password: [] }} />
+            <SettingsArea scanedDevice={services || new Set<Service>()} refresh={() => { Refresh(true) }} data={data || { opt: [], password: [] }} />
           </TabsContent>
         </Tabs>
       </View>

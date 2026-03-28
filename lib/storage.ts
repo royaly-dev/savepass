@@ -1,6 +1,8 @@
+import 'react-native-get-random-values'
 import { createMMKV, deleteMMKV, existsMMKV } from 'react-native-mmkv'
-import Aes from 'react-native-aes-crypto'
 import { Data, syncDevice } from '@/types/Data'
+import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
 
 let KEY = ""
 
@@ -17,9 +19,9 @@ export const GetStorage = async (key: string) => {
     })
 
     try {
-        const decrypt = (await Aes.decrypt(String(instance.getString("test")), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc')).toString()
+        const decrypt = CryptoJS.AES.decrypt(String(instance.getString("test")), key).toString(CryptoJS.enc.Utf8)
         if (decrypt === "test") {
-            KEY = await Aes.sha256(key)
+            KEY = key
             return true
         } else {
             return false
@@ -38,13 +40,11 @@ export const CreateStorage = async (key: string) => {
         readOnly: false,
     })
 
-    instance.set("iv", String(await Aes.randomKey(16)))
+    instance.set("test", String(CryptoJS.AES.encrypt("test", key)))
 
-    instance.set("test", String((await Aes.encrypt("test", await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
+    instance.set("data", String(CryptoJS.AES.encrypt(JSON.stringify(<Data>{ password: [], opt: [] }), key)))
 
-    instance.set("data", String((await Aes.encrypt(JSON.stringify(<Data>{ password: [], opt: [] }), await Aes.sha256(key), String(instance.getString("iv")), 'aes-256-cbc'))))
-
-    instance.set("sync", String(JSON.stringify(<syncDevice>{ lastSync: 0, syncKey: await Aes.randomUuid(), status: false, data: [] })))
+    instance.set("sync", String(JSON.stringify(<syncDevice>{ lastSync: 0, syncKey: uuidv4(), status: false, data: [] })))
 
     return true
 
@@ -61,7 +61,7 @@ export const SaveStorageData = async (data: Data) => {
         readOnly: false,
     })
 
-    instance.set("data", String((await Aes.encrypt(JSON.stringify(data), KEY, String(instance.getString("iv")), 'aes-256-cbc'))))
+    instance.set("data", String(CryptoJS.AES.encrypt(JSON.stringify(data), KEY)))
 
     return true
 }
@@ -77,7 +77,7 @@ export const GetStorageData = async () => {
         readOnly: false,
     })
 
-    return <Data>JSON.parse(String((await Aes.decrypt(String(instance.getString("data")), KEY, String(instance.getString("iv")), 'aes-256-cbc'))))
+    return <Data>JSON.parse(String(CryptoJS.AES.decrypt(String(instance.getString("data")), KEY).toString(CryptoJS.enc.Utf8)))
 }
 
 export const GetSyncData = async (): Promise<syncDevice | false> => {
