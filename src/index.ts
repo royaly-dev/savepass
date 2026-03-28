@@ -70,7 +70,7 @@ const createWindow = (): void => {
   })
 
   ipcMain.on("syncFinished", (event, data: { type: number, name: string }) => {
-    mainWindow.webContents.send("syncRefresh", data)
+    mainWindow.webContents.send("syncRefresh", null, data)
   })
 
   ipcMain.on("syncError", () => {
@@ -163,7 +163,7 @@ const startSync = async () => {
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
-          ipcMain.emit("syncFinished", { type: 1, name: scanedDevice.host })
+          ipcMain.emit("syncFinished", null, { type: 1, name: scanedDevice.host })
         } else {
           console.log("Error while sync with : " + scanedDevice.name)
         }
@@ -245,6 +245,7 @@ ipcMain.on("SaveData", (event, data) => {
   }
 
   store.set('data', CryptoJS.AES.encrypt(JSON.stringify(data), master).toString())
+  startSync()
 })
 
 ipcMain.handle("isTotpValid", async (event, code: string) => {
@@ -417,7 +418,7 @@ const webserver = async () => {
           SyncDevice.status = SyncDevice.data.length > 0
 
           await store.set("sync", JSON.stringify(SyncDevice))
-          ipcMain.emit("syncFinished", { type: 2, name: parsedbody.name })
+          ipcMain.emit("syncFinished", null, { type: 2, name: parsedbody.name })
           console.log("setup finished")
           instance.unpublishAll()
 
@@ -439,7 +440,7 @@ const webserver = async () => {
       req.on("end", async () => {
         const body: { syncKey: string, data: Data } = await JSON.parse(chunkBody)
         const syncDeviceData: syncDevice = JSON.parse(store.get("sync"))
-        const isInSync = /*syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0*/ true
+        const isInSync = syncDeviceData.data.filter((item) => item.syncKey === body.syncKey).length > 0
 
 
         if (isInSync && master != "") {
@@ -485,7 +486,7 @@ const webserver = async () => {
           await store.set("sync", JSON.stringify(<syncDevice>{ ...syncDeviceData, lastSync: Date.now() }))
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), master).toString())
 
-          /*ipcMain.emit("syncFinished", { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })*/
+          ipcMain.emit("syncFinished", null, { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
           const encryptedData = CryptoJS.AES.encrypt(JSON.stringify({ data: tempSyncData, confirm: true }), syncKey).toString()
@@ -513,7 +514,7 @@ const webserver = async () => {
         syncData.status = syncData.data.length > 0
         await store.set("sync", JSON.stringify(syncData))
 
-        ipcMain.emit("syncFinished", { type: 3, name: syncData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
+        ipcMain.emit("syncFinished", null, { type: 3, name: syncData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
 
         res.statusCode = 200
         res.end("")
