@@ -230,6 +230,8 @@ ipcMain.handle("Check", (event, data) => {
     if (process.platform == "linux") {
       checkUpdateForLinux()
     }
+    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).public, 'public')
+    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).private, 'private')
     syncKey = (<syncDevice>JSON.parse(store.get("sync"))).syncKey
     if ((<syncDevice>JSON.parse(store.get("sync"))).status) {
       startSync()
