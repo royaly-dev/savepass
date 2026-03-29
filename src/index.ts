@@ -17,19 +17,10 @@ import NodeRSA from 'node-rsa'
 
 const key = new NodeRSA({ b: 2048 });
 
-const setKeyPublic = (keyImport: string, sync: boolean) => {
-  if (!sync) {
-    keyImport = (<syncDevice>JSON.parse(store.get('sync'))).public
-    console.log(keyImport)
-  }
-  key.importKey(keyImport, 'public')
-}
-
 if (launching) app.quit()
 
 const store: any = new Store();
 const instance = new Bonjour({})
-
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
@@ -161,6 +152,7 @@ const startSync = async () => {
     for (const scanedDevice of DeviceScan.services) {
       if (scanedDevice.name.includes(device.syncKey)) {
         const tempKey = CryptoJS.lib.WordArray.random(32).toString()
+        console.log(key.exportKey('public'))
         const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
@@ -170,11 +162,10 @@ const startSync = async () => {
           })
         }).then(async responce => {
           const jsonBody = await responce.json()
-          setKeyPublic(device?.public, true)
-          return JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), key.decryptPublic(jsonBody.key, 'base64').toString()).toString(CryptoJS.enc.Utf8))
+          const tempKeyRSA = new NodeRSA({ b: 2048 });
+          tempKeyRSA.importKey(device.public, 'public')
+          return { ...jsonBody, data: JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), tempKeyRSA.decryptPublic(jsonBody.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8)) }
         })
-
-        setKeyPublic("", false)
 
         if (syncWithDevice?.confirm) {
           await store.set('data', CryptoJS.AES.encrypt(JSON.stringify(syncWithDevice.data), master).toString())
@@ -463,10 +454,11 @@ const webserver = async () => {
 
 
         if (isInSync.length > 0 && master != "") {
-          setKeyPublic(isInSync[0]?.public, true)
+          const tempKeyRSA = new NodeRSA({ b: 2048 });
+          tempKeyRSA.importKey(isInSync[0].public, 'public')
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
-          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, key.decryptPublic(body.key, 'base64')).toString(CryptoJS.enc.Utf8))
-          setKeyPublic("", false)
+          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, tempKeyRSA.decryptPublic(body.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8))
+          console.log(syncData)
           let insert = false
 
           for (const password of syncData.password) {
