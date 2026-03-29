@@ -160,7 +160,7 @@ const startSync = async () => {
   for (const device of SyncDeviceData.data) {
     for (const scanedDevice of DeviceScan.services) {
       if (scanedDevice.name.includes(device.syncKey)) {
-        const tempKey = CryptoJS.lib.WordArray.random(64)
+        const tempKey = CryptoJS.lib.WordArray.random(32)
         const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
@@ -508,7 +508,7 @@ const webserver = async () => {
           ipcMain.emit("syncFinished", null, { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
-          const tempKey = CryptoJS.lib.WordArray.random(64)
+          const tempKey = CryptoJS.lib.WordArray.random(32)
           const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), tempKey).toString()
           res.end(JSON.stringify({ data: encryptedData, confirm: true, key: key.encryptPrivate(tempKey, 'base64') }))
         } else {
