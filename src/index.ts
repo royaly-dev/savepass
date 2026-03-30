@@ -50,11 +50,11 @@ if (process.platform != "linux") {
 
 const mainInstance = instance.find({ type: "http" }, (service: Service) => {
   console.log("Detected a service")
-  if (Boolean(service.txt?.readytosync) && (Date.now() - service.txt?.time) < 10000) {
-    const synckey = service.name.split("_")
-    ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: service.host }, ip: service.addresses[0] })
-  }
   if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host).length === 0 && service.addresses.length > 0) {
+    if (Boolean(service.txt?.readytosync) && (Date.now() - service.txt?.time) < 10000) {
+      const synckey = service.name.split("_")
+      ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: service.host }, ip: service.addresses[0] })
+    }
     Services.push(service)
   }
 })
