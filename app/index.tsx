@@ -12,13 +12,24 @@ import { useState, useEffect } from 'react';
 import { GetStorageData, GetSyncData, isExist, SaveStorageData, SetSyncData } from '@/lib/storage';
 import CheckPasswordCard from '@/components/CheckPasswordCard';
 import CreatePasswordCard from '@/components/CreatePasswordCard';
-import { Data, syncDevice } from '@/types/Data';
+import { Data, syncData, syncDevice } from '@/types/Data';
 import PasswordArea from '@/components/PasswordArea';
 import TOTPArea from '@/components/TOTPArea';
 import SettingsArea from '@/components/SettingsArea';
 import Zeroconf, { Service } from 'react-native-zeroconf'
 import CryptoJS from 'crypto-js';
 import { RSA } from 'react-native-rsa-native';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { addDevice } from '@/components/SyncModal';
 
 const SCREEN_OPTIONS = {
   title: 'SavePass Mobile',
@@ -32,6 +43,7 @@ export default function Screen() {
   const [isStorageExist, setIsStorageExist] = useState<boolean>(false)
   const [data, setData] = useState<Data | null>(null)
   const [services, setServices] = useState<Set<Service> | null>(null)
+  const [devicePairBox, setDevicePairBox] = useState<{ open: boolean, data: Service | null }>({ open: false, data: null })
 
   const instance = new Zeroconf()
 
@@ -40,6 +52,7 @@ export default function Screen() {
   instance.on('resolved', service => {
     if (service.name.split("_")[1] === "savepass") {
       console.log("adding newdevice")
+      console.log(service.txt)
       setServices(prev => {
         const newSet = prev ? new Set(prev) : new Set<Service>()
         const isExist: boolean = Array.from(newSet).filter(item => item.name === service.name).length > 0
@@ -48,6 +61,9 @@ export default function Screen() {
         }
         return newSet
       })
+      if (!(Array.from(services || []).filter(item => item.name === service.name).length > 0) && Boolean(service.txt.readytosync) && Date.now() - service.txt.time < 10000 && isStorageChecked) {
+        setDevicePairBox({ open: true, data: service })
+      }
     }
   })
 
@@ -85,7 +101,8 @@ export default function Screen() {
             body: JSON.stringify({
               data: CryptoJS.AES.encrypt(JSON.stringify(await GetStorageData()), tempKey).toString(),
               syncKey: Devicesdata.syncKey,
-              key: await RSA.encrypt64(tempKey, device.public)
+              key: await RSA.encrypt64(tempKey, device.public),
+              mobile: true
             })
           })
           if (req.status === 200) {
@@ -118,6 +135,24 @@ export default function Screen() {
 
   return (
     <>
+      <AlertDialog open={devicePairBox.open} onOpenChange={() => { setDevicePairBox({ ...devicePairBox, open: !devicePairBox.open }) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>A new device is waiting to be paired !</AlertDialogTitle>
+            <AlertDialogDescription>
+              A new device on your device is waiting to be paired, do you want to pair it ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              <Text>No</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction onPress={async () => { const syncdata = await GetSyncData(); if (devicePairBox.data && syncdata) addDevice(devicePairBox.data, syncdata, () => { Refresh(true) }, () => { }) }}>
+              <Text>Yes</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Stack.Screen options={SCREEN_OPTIONS} />
       <View className="flex-1 w-full p-4 pt-20">
         <Tabs value={value} onValueChange={setValue} className="flex-1 w-full">

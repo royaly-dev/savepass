@@ -4,7 +4,7 @@ import { syncData, syncDevice } from "@/types/Data";
 import Carousel, { ICarouselInstance } from "react-native-reanimated-carousel";
 import { useWindowDimensions, View } from "react-native";
 import { Text } from '@/components/ui/text';
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { AlertCircleIcon, Check, MonitorSmartphoneIcon } from "lucide-react-native";
@@ -13,6 +13,39 @@ import { SetSyncData } from "@/lib/storage";
 import { getDeviceName } from 'react-native-device-info'
 import { Alert, AlertDescription } from "./ui/alert";
 
+
+export const addDevice = async (dataAdd: Service, data: syncDevice, refreshData: () => void, setErrorMsg: (text: string) => void, CarouselRef?: RefObject<ICarouselInstance | null>) => {
+    setErrorMsg("")
+    const device = dataAdd.name.split("_")
+    if (data.data.findIndex(item => item.syncKey === device[device.length - 1]) !== -1) {
+        console.log("already added")
+    } else {
+        try {
+            const req = await fetch("http://" + dataAdd.addresses[0] + ":5263/setupSync", {
+                method: "POST",
+                body: JSON.stringify({
+                    name: await getDeviceName(),
+                    syncKey: data.syncKey,
+                    key: data.public
+                })
+            })
+            if (req.status !== 200) {
+                throw new Error("error")
+            }
+            data.data.push({ lastSync: Date.now(), name: device[0], syncKey: device[device.length - 1], public: (await req.json()).key })
+        } catch (error) {
+            console.log(error)
+            setErrorMsg("The device is not reachable, check your firewall rules !")
+            return
+        }
+        data.status = data.data.length > 0
+        await SetSyncData(data)
+    }
+    if (CarouselRef?.current) {
+        CarouselRef.current?.next()
+    }
+    refreshData()
+}
 
 export default function SyncModal({ scanedDevice, data, open, refreshData, onchange }: { scanedDevice: Set<Service>, data: syncDevice, open: boolean, refreshData(): void, onchange(value: boolean): void }) {
 
@@ -33,39 +66,6 @@ export default function SyncModal({ scanedDevice, data, open, refreshData, oncha
         if (CarouselRef) {
             CarouselRef.current?.next()
         }
-    }
-
-    const addDevice = async (dataAdd: Service) => {
-        setErrorMsg("")
-        const device = dataAdd.name.split("_")
-        if (data.data.findIndex(item => item.syncKey === device[device.length - 1]) !== -1) {
-            console.log("already added")
-        } else {
-            try {
-                const req = await fetch("http://" + dataAdd.addresses[0] + ":5263/setupSync", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        name: await getDeviceName(),
-                        syncKey: data.syncKey,
-                        key: data.public
-                    })
-                })
-                if (req.status !== 200) {
-                    throw new Error("error")
-                }
-                data.data.push({ lastSync: Date.now(), name: device[0], syncKey: device[device.length - 1], public: (await req.json()).key })
-            } catch (error) {
-                console.log(error)
-                setErrorMsg("The device is not reachable, check your firewall rules !")
-                return
-            }
-            data.status = data.data.length > 0
-            await SetSyncData(data)
-        }
-        if (CarouselRef) {
-            CarouselRef.current?.next()
-        }
-        refreshData()
     }
 
     const removeDevice = async (dataRemove: syncData) => {
@@ -154,7 +154,7 @@ export default function SyncModal({ scanedDevice, data, open, refreshData, oncha
                                                                         <MonitorSmartphoneIcon color={colorScheme === 'dark' ? '#fff' : '#000'} />
                                                                         <Text>{item.name.split("_")[0]}</Text>
                                                                     </View>
-                                                                    <Button onPress={() => { addDevice(item) }} className="bg-green-500" variant="default"><Text>Add</Text></Button>
+                                                                    <Button onPress={() => { addDevice(item, data, refreshData, setErrorMsg, CarouselRef) }} className="bg-green-500" variant="default"><Text>Add</Text></Button>
                                                                 </Card>
                                                             ))
                                                         }
