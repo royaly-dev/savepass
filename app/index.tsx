@@ -52,7 +52,6 @@ export default function Screen() {
   instance.on('resolved', service => {
     if (service.name.split("_")[1] === "savepass") {
       console.log("adding newdevice")
-      console.log(service.txt)
       setServices(prev => {
         const newSet = prev ? new Set(prev) : new Set<Service>()
         const isExist: boolean = Array.from(newSet).filter(item => item.name === service.name).length > 0
@@ -61,7 +60,7 @@ export default function Screen() {
         }
         return newSet
       })
-      if (!(Array.from(services || []).filter(item => item.name === service.name).length > 0) && Boolean(service.txt.readytosync) && Date.now() - service.txt.time < 10000 && isStorageChecked) {
+      if (!(Array.from(services || []).filter(item => item.name === service.name).length > 0) && Boolean(service.txt.readytosync) && Date.now() - service.txt.time < 2000 && isStorageChecked) {
         setDevicePairBox({ open: true, data: service })
       }
     }
