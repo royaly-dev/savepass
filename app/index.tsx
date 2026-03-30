@@ -18,6 +18,7 @@ import TOTPArea from '@/components/TOTPArea';
 import SettingsArea from '@/components/SettingsArea';
 import Zeroconf, { Service } from 'react-native-zeroconf'
 import CryptoJS from 'crypto-js';
+import { RSA } from 'react-native-rsa-native';
 
 const SCREEN_OPTIONS = {
   title: 'SavePass Mobile',
@@ -67,22 +68,30 @@ export default function Screen() {
   }
 
   const syncDevices = async () => {
-    const Devicesdata: syncDevice = await GetSyncData() || { data: [], lastSync: 0, status: false, syncKey: "" }
+    const Devicesdata: syncDevice = await GetSyncData() || { data: [], lastSync: 0, status: false, syncKey: "", private: "", public: "" }
+    if (!Devicesdata?.public || !Devicesdata?.private) {
+      const keyGen = await RSA.generateKeys(2048)
+
+      Devicesdata.private = keyGen.private
+      Devicesdata.public = keyGen.public
+    }
     for (const device of Devicesdata.data) {
       const ip = Array.from(services || new Set<Service>).filter(item => item.name.split("_")[item.name.split("_").length - 1] === device.syncKey)[0]?.addresses[0]
       if (ip) {
         try {
+          const tempKey = CryptoJS.lib.WordArray.random(32).toString()
           const req = await fetch("http://" + ip + ":5263/sync", {
             method: 'POST',
             body: JSON.stringify({
-              data: await GetStorageData(),
-              syncKey: Devicesdata.syncKey
+              data: CryptoJS.AES.encrypt(JSON.stringify(await GetStorageData()), tempKey).toString(),
+              syncKey: Devicesdata.syncKey,
+              key: await RSA.encrypt64(tempKey, device.public)
             })
           })
           if (req.status === 200) {
             const reqJSON = await req.json()
-            const decryptedData = JSON.parse(CryptoJS.AES.decrypt(reqJSON.data, device.syncKey).toString(CryptoJS.enc.Utf8))
-            await SaveStorageData(decryptedData.data)
+            const decryptedData = JSON.parse(CryptoJS.AES.decrypt(reqJSON.data, await RSA.decrypt(reqJSON.key, Devicesdata.private)).toString(CryptoJS.enc.Utf8))
+            await SaveStorageData(decryptedData)
             Refresh(false)
           }
         } catch (error) {

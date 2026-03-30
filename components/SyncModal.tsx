@@ -46,18 +46,19 @@ export default function SyncModal({ scanedDevice, data, open, refreshData, oncha
                     method: "POST",
                     body: JSON.stringify({
                         name: await getDeviceName(),
-                        syncKey: data.syncKey
+                        syncKey: data.syncKey,
+                        key: data.public
                     })
                 })
                 if (req.status !== 200) {
                     throw new Error("error")
                 }
+                data.data.push({ lastSync: Date.now(), name: device[0], syncKey: device[device.length - 1], public: (await req.json()).key })
             } catch (error) {
                 console.log(error)
                 setErrorMsg("The device is not reachable, check your firewall rules !")
                 return
             }
-            data.data.push({ lastSync: Date.now(), name: device[0], syncKey: device[device.length - 1] })
             data.status = data.data.length > 0
             await SetSyncData(data)
         }

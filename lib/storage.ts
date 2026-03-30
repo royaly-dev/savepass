@@ -3,6 +3,7 @@ import { createMMKV, deleteMMKV, existsMMKV } from 'react-native-mmkv'
 import { Data, syncDevice } from '@/types/Data'
 import CryptoJS from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
+import { RSA } from 'react-native-rsa-native';
 
 let KEY = ""
 
@@ -44,7 +45,9 @@ export const CreateStorage = async (key: string) => {
 
     instance.set("data", String(CryptoJS.AES.encrypt(JSON.stringify(<Data>{ password: [], opt: [] }), key)))
 
-    instance.set("sync", String(JSON.stringify(<syncDevice>{ lastSync: 0, syncKey: uuidv4(), status: false, data: [] })))
+    const keyGen = await RSA.generateKeys(2048)
+
+    instance.set("sync", String(JSON.stringify(<syncDevice>{ lastSync: 0, syncKey: uuidv4(), status: false, data: [], private: keyGen.private, public: keyGen.public })))
 
     return true
 
