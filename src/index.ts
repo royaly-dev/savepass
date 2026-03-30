@@ -50,6 +50,10 @@ if (process.platform != "linux") {
 
 const mainInstance = instance.find({ type: "http" }, (service: Service) => {
   console.log("Detected a service")
+  if (Boolean(service.txt?.readytosync) && (Date.now() - service.txt?.time) < 10000) {
+    const synckey = service.name.split("_")
+    ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: service.host }, ip: service.addresses[0] })
+  }
   if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host).length === 0 && service.addresses.length > 0) {
     Services.push(service)
   }
@@ -71,8 +75,12 @@ const createWindow = (): void => {
     genTotptimeout(0)
   })
 
+  ipcMain.on("ready_to_pair", (event, data: { newdevice: syncData, ip: string }) => {
+    mainWindow.webContents.send("ready_to_pair", [null, data])
+  })
+
   ipcMain.on("syncFinished", (event, data: { type: number, name: string }) => {
-    mainWindow.webContents.send("syncRefresh", null, data)
+    mainWindow.webContents.send("syncRefresh", [null, data])
   })
 
   ipcMain.on("syncError", () => {
@@ -345,7 +353,8 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
     return Services
   } else {
     const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
-    instance.publish({ name: host, type: 'http', port: 3600 });
+    instance.unpublishAll()
+    instance.publish({ name: host, type: 'http', port: 3600, txt: { readytosync: "true", time: Date.now() } });
     isWaiting = true
     return { confirm: true }
   }

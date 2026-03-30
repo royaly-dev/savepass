@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import MasterPasswordSetup from '@/components/MasterPasswordSetup';
 import MasterPasswordCheck from '@/components/MasterPasswordCheck';
-import { Check, Download, KeyRound, RectangleEllipsis, Settings, User } from 'lucide-react';
+import { Check, Download, KeyRound, Link, RectangleEllipsis, Settings, User } from 'lucide-react';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Data, OptData, PasswordData, syncData, syncDevice } from '@/types/Data';
 import { Button } from './components/ui/button';
@@ -17,6 +17,16 @@ import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } 
 import { Input } from './components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './components/ui/select';
 import RecoverPasswordModal from './components/RecoverPasswordModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 function Homepage() {
 
@@ -32,6 +42,7 @@ function Homepage() {
   const [optCodeLeft, setOptCodeLeft] = useState<number>(0)
   const [SelectValueSearch, setSelectValueSearch] = useState<string>("By WebSite")
   const [SearchValue, setSearchValue] = useState<string>("")
+  const [devicePairBox, setDevicePairBox] = useState<{ open: boolean, data: { newdevice: syncData, ip: string } }>({ open: false, data: { ip: "", newdevice: { lastSync: 0, name: "", syncKey: "" } } })
 
   useEffect(() => {
     if (!carouselApi) {
@@ -72,7 +83,11 @@ function Homepage() {
           break;
       }
       refreshOPT()
-    })
+    });
+
+    (window as any).savepass.ready_to_pair((data: { newdevice: syncData, ip: string }) => {
+      setDevicePairBox({ open: true, data: data })
+    });
 
     refreshOPT()
     refresh()
@@ -161,6 +176,20 @@ function Homepage() {
 
   return (
     <main className='grid grid-cols-10 h-screen'>
+      <AlertDialog open={devicePairBox.open} onOpenChange={() => { setDevicePairBox({ ...devicePairBox, open: !devicePairBox.open }) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>A new device is waiting to be paired !</AlertDialogTitle>
+            <AlertDialogDescription>
+              A new device on your device is waiting to be paired, do you want to pair it ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction onClick={async () => { await (window as any).savepass.addSyncDevice(devicePairBox.data) }}>Yes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <ManagePassword updateData={updatePasswordData} openChange={() => { setIsAddingPassword(false); setTypeAddingPassword("add"); setUpdatePasswordData(null) }} type={typeAddingPassword} requestPassword={isAddingPassword} data={data} refresh={refresh} />
       <ManageTotp data={data} openChange={() => { setIsAddingTOTP(false) }} refresh={refreshOPT} request={isAddingTOTP} />
       <nav className='flex self-center col-span-1 w-full justify-center items-center flex-col my-2 bg-muted-foreground/15 h-fit rounded-md py-2 mx-2 box-content'>

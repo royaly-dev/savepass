@@ -68,5 +68,10 @@ contextBridge.exposeInMainWorld('savepass', {
   },
   isTotpValid: async (code: string) => {
     return await ipcRenderer.invoke("isTotpValid", code)
+  },
+  ready_to_pair: (callback: any) => {
+    ipcRenderer.on("ready_to_pair", (event, data: { newdevice: syncData, ip: string }) => {
+      callback(data)
+    })
   }
 })
