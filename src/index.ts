@@ -16,6 +16,7 @@ import launching from 'electron-squirrel-startup'
 import NodeRSA from 'node-rsa'
 
 const key = new NodeRSA({ b: 2048 });
+key.setOptions({ encryptionScheme: 'pkcs1' })
 
 if (launching) app.quit()
 
@@ -152,19 +153,19 @@ const startSync = async () => {
     for (const scanedDevice of DeviceScan.services) {
       if (scanedDevice.name.includes(device.syncKey)) {
         const tempKey = CryptoJS.lib.WordArray.random(32).toString()
-        console.log(key.exportKey('public'))
+        const tempKeyRSA = new NodeRSA({ b: 2048 });
+        tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
+        tempKeyRSA.importKey(device.public, 'pkcs1-public-pem')
         const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
             syncKey: syncKey,
-            key: key.encryptPrivate(tempKey, 'base64'),
+            key: tempKeyRSA.encrypt(tempKey, 'base64'),
             data: CryptoJS.AES.encrypt(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8), tempKey).toString()
           })
         }).then(async responce => {
           const jsonBody = await responce.json()
-          const tempKeyRSA = new NodeRSA({ b: 2048 });
-          tempKeyRSA.importKey(device.public, 'public')
-          return { ...jsonBody, data: JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), tempKeyRSA.decryptPublic(jsonBody.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8)) }
+          return { ...jsonBody, data: JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), key.decrypt(jsonBody.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8)) }
         })
 
         if (syncWithDevice?.confirm) {
@@ -203,7 +204,7 @@ ipcMain.handle("Register", async (event, data) => {
   if (!store.get("master")) {
     await store.set("master", CryptoJS.AES.encrypt(data, data).toString())
     await store.set("data", CryptoJS.AES.encrypt(JSON.stringify({ password: [], opt: [] }), data).toString())
-    await store.set("sync", JSON.stringify(<syncDevice>{ syncKey: randomUUID(), data: [], lastSync: 0, status: false, private: key.exportKey('private'), public: key.exportKey('public') }))
+    await store.set("sync", JSON.stringify(<syncDevice>{ syncKey: randomUUID(), data: [], lastSync: 0, status: false, private: key.exportKey('pkcs1-private-pem'), public: key.exportKey('pkcs1-public-pem') }))
     return true
   } else {
     return false
@@ -221,8 +222,8 @@ ipcMain.handle("Check", (event, data) => {
     if (process.platform == "linux") {
       checkUpdateForLinux()
     }
-    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).public, 'public')
-    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).private, 'private')
+    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).public, 'pkcs1-public-pem')
+    key.importKey((<syncDevice>JSON.parse(store.get('sync'))).private, 'pkcs1-private-pem')
     syncKey = (<syncDevice>JSON.parse(store.get("sync"))).syncKey
     if ((<syncDevice>JSON.parse(store.get("sync"))).status) {
       startSync()
@@ -358,7 +359,7 @@ ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: s
     body: JSON.stringify({
       syncKey: syncKey,
       name: hostname(),
-      key: key.exportKey('public')
+      key: key.exportKey('pkcs1-public-pem')
     })
   })
 
@@ -434,7 +435,7 @@ const webserver = async () => {
 
           isWaiting = false
           res.statusCode = 200
-          res.end(JSON.stringify({ key: key.exportKey('public') }))
+          res.end(JSON.stringify({ key: key.exportKey('pkcs1-public-pem') }))
         } else {
           res.statusCode = 400
           res.end("")
@@ -455,10 +456,9 @@ const webserver = async () => {
 
         if (isInSync.length > 0 && master != "") {
           const tempKeyRSA = new NodeRSA({ b: 2048 });
-          tempKeyRSA.importKey(isInSync[0].public, 'public')
+          tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
-          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, tempKeyRSA.decryptPublic(body.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8))
-          console.log(syncData)
+          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, key.decrypt(body.key, 'base64').toString()).toString(CryptoJS.enc.Utf8))
           let insert = false
 
           for (const password of syncData.password) {
@@ -504,7 +504,8 @@ const webserver = async () => {
           res.setHeader("Content-Type", "text/plain")
           const tempKey = CryptoJS.lib.WordArray.random(32).toString()
           const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), tempKey).toString()
-          res.end(JSON.stringify({ data: encryptedData, confirm: true, key: key.encryptPrivate(tempKey, 'base64') }))
+          tempKeyRSA.importKey(isInSync[0].public, 'pkcs1-public-pem')
+          res.end(JSON.stringify({ data: encryptedData, confirm: true, key: tempKeyRSA.encrypt(tempKey, 'base64') }))
         } else {
           res.statusCode = 400
           res.end(JSON.stringify({ confirm: false }))
