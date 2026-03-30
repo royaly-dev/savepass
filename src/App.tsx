@@ -45,13 +45,6 @@ function Homepage() {
   const [devicePairBox, setDevicePairBox] = useState<{ open: boolean, data: { newdevice: syncData, ip: string } }>({ open: false, data: { ip: "", newdevice: { lastSync: 0, name: "", syncKey: "" } } })
 
   useEffect(() => {
-    if (!carouselApi) {
-      return
-    }
-    if (currentSection) {
-      carouselApi.scrollTo(currentSection == "password" ? 0 : currentSection == "opt" ? 1 : currentSection == "user" ? 2 : 3)
-    }
-
     (window as any).savepass.onGetOTP((data: { left: number, data: OptData[] }) => {
       setOptCode(data.data)
       setOptCodeLeft(data.left)
@@ -88,6 +81,15 @@ function Homepage() {
     (window as any).savepass.ready_to_pair((data: { newdevice: syncData, ip: string }) => {
       setDevicePairBox({ open: true, data: data })
     });
+  }, [])
+
+  useEffect(() => {
+    if (!carouselApi) {
+      return
+    }
+    if (currentSection) {
+      carouselApi.scrollTo(currentSection == "password" ? 0 : currentSection == "opt" ? 1 : currentSection == "user" ? 2 : 3)
+    }
 
     refreshOPT()
     refresh()
