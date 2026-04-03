@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Save Pass</h1>
+<h1 align="center" id="title">Save Pass - Extenton</h1>
 
 <p id="description">A simple password manager that stores your passwords and TOTP codes in one place with the ability to sync all your data across devices including your phone.</p>
 

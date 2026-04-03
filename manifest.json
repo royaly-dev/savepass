@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "SavePass",
+    "version": "0.0.8",
+    "description": "SavePass extention for web.",
+    "icons": {
+        "256": "icon-256.png"
+    },
+    "action": {
+        "default_icon": {
+            "256": "icon-256.png"
+        },
+        "default_title": "SavePass",
+        "default_popup": "popup.html"
+    },
+    "permissions": [],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "dist/content.js"
+            ]
+        }
+    ],
+    "background": {
+        "scripts": [
+            "dist/background.js"
+        ],
+        "service_worker": "dist/background.js"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:5263 http://localhost:5263/*"
+    }
+}
