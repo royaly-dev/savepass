@@ -4,11 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./dist/output.css" rel="stylesheet">
     <title>SavePass</title>
 </head>
 
-<body>
-    <h1>test</h1>
+<body class="w-96 h-96">
+    <div id="loading" class="w-full h-full flex justify-center items-center flex-col gap-2">
+        <img src="icon-256.png" class="w-32 h-32">
+        <h1 class="text-4xl font-[Noto_Sans] font-semibold">SavePass</h1>
+        <p id="main_msg" class="text-base mt-3">Connecting to your SavePass...</p>
+    </div>
+    <div id="showPass" class="hidden justify-center items-center flex-col h-full w-full">
+        <h1 id="link"></h1>
+        <div class="border ">
+            <p id="email"></p>
+        </div>
+        <div class="">
+            <p id="password"></p>
+        </div>
+    </div>
 </body>
+<script src="dist/popup.js" type="module"></script>
 
 </html>

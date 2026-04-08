@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "<h1 align=\"center\" id=\"title\">Save Pass - Extenton</h1>",
   "scripts": {
-    "build": "tsc --watch"
+    "build": "tsc --watch & npx @tailwindcss/cli -i ./src/input.css -o ./dist/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,9 @@
   "devDependencies": {
     "@types/chrome": "^0.1.38",
     "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
   }
 }
