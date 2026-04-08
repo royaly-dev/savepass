@@ -13,7 +13,10 @@
         "default_title": "SavePass",
         "default_popup": "popup.html"
     },
-    "permissions": [],
+    "permissions": [
+        "storage",
+        "tabs"
+    ],
     "content_scripts": [
         {
             "matches": [

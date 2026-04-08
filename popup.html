@@ -8,20 +8,31 @@
     <title>SavePass</title>
 </head>
 
-<body class="w-96 h-96">
+<body class="w-96 h-96 flex justify-center items-center">
     <div id="loading" class="w-full h-full flex justify-center items-center flex-col gap-2">
         <img src="icon-256.png" class="w-32 h-32">
         <h1 class="text-4xl font-[Noto_Sans] font-semibold">SavePass</h1>
         <p id="main_msg" class="text-base mt-3">Connecting to your SavePass...</p>
     </div>
-    <div id="showPass" class="hidden justify-center items-center flex-col h-full w-full">
-        <h1 id="link"></h1>
-        <div class="border ">
+    <div id="showPass" class="hidden justify-center items-center flex-col h-full w-[80%] gap-1.5">
+        <img src="icon-256.png" class="w-16 h-16 absolute top-4">
+        <h1 id="link" class="w-full text-center text-xl bottom-1.5"></h1>
+        <div class="border bg-neutral-400/5 p-2 rounded-lg w-full">
+            <span>Email : </span>
             <p id="email"></p>
         </div>
-        <div class="">
+        <div class="border bg-neutral-400/5 p-2 rounded-lg w-full">
+            <span>Password : </span>
             <p id="password"></p>
         </div>
+        <button id="button"
+            class="absolute bottom-8 inline-flex h-12 items-center justify-center rounded-md bg-neutral-950 px-6 font-medium text-neutral-50 shadow-lg shadow-neutral-500/20 transition active:scale-95">Apply</button>
+    </div>
+    <div id="setupSync" class="w-full h-full hidden justify-center items-center flex-col gap-2">
+        <img src="icon-256.png" class="w-32 h-32">
+        <h1 class="text-4xl font-[Noto_Sans] font-semibold">SavePass</h1>
+        <p class="text-base mt-3">Your browser is not sync with the app ! Go to the app click on setup
+            sync or manage sync and click on "search for a device" then add the device named "browser"</p>
     </div>
 </body>
 <script src="dist/popup.js" type="module"></script>
