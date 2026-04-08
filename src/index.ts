@@ -364,31 +364,41 @@ ipcMain.handle("SyncSetup", async (event, type: string) => {
 ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: string }) => {
   const SyncDevice: syncDevice = await JSON.parse(await store.get("sync"))
 
-  const syncWithDevice = await fetch("http://" + data.ip + ":5263/setupSync", {
-    method: 'POST',
-    body: JSON.stringify({
-      syncKey: syncKey,
-      name: hostname(),
-      key: key.exportKey('pkcs1-public-pem')
+  if (data.ip !== "0.0.0.0") {
+    const syncWithDevice = await fetch("http://" + data.ip + ":5263/setupSync", {
+      method: 'POST',
+      body: JSON.stringify({
+        syncKey: syncKey,
+        name: hostname(),
+        key: key.exportKey('pkcs1-public-pem')
+      })
     })
-  })
 
-  if (syncWithDevice.status === 200) {
-    const syncWithDeviceData = await syncWithDevice.json()
-    SyncDevice.data.push({ ...data.newdevice, public: syncWithDeviceData.key })
+    if (syncWithDevice.status === 200) {
+      const syncWithDeviceData = await syncWithDevice.json()
+      SyncDevice.data.push({ ...data.newdevice, public: syncWithDeviceData.key })
+      SyncDevice.lastSync = Date.now()
+      SyncDevice.status = SyncDevice.data.length > 0
+
+      Services.slice(0, Services.length)
+      Services.push(...Services.filter(item => item.host !== data.newdevice.name))
+
+      await store.set("sync", JSON.stringify(SyncDevice))
+
+      return { confirm: true }
+    } else {
+      ipcMain.emit("syncError")
+
+      return { confirm: false }
+    }
+  } else if (data.ip === "0.0.0.0") {
+    SyncDevice.data.push({ ...data.newdevice, public: "none" })
     SyncDevice.lastSync = Date.now()
     SyncDevice.status = SyncDevice.data.length > 0
-
-    Services.slice(0, Services.length)
-    Services.push(...Services.filter(item => item.host !== data.newdevice.name))
 
     await store.set("sync", JSON.stringify(SyncDevice))
 
     return { confirm: true }
-  } else {
-    ipcMain.emit("syncError")
-
-    return { confirm: false }
   }
 
 })
@@ -543,6 +553,121 @@ const webserver = async () => {
 
         res.statusCode = 200
         res.end("")
+      })
+    } else if (req.url.includes("status")) {
+
+      if (req.socket.remoteAddress !== "127.0.0.1") {
+        res.statusCode = 400
+        return res.end()
+      }
+
+      let chunkBody = ""
+
+      req.on("data", (chunk: string) => {
+        chunkBody += chunk
+      })
+
+      req.on("end", async () => {
+        if (master !== "") {
+          res.statusCode = 200
+        } else {
+          res.statusCode = 400
+        }
+        res.end()
+      })
+    } else if (req.url.includes("testSync")) {
+
+      if (req.socket.remoteAddress !== "127.0.0.1") {
+        res.statusCode = 400
+        return res.end()
+      }
+
+      let chunkBody = ""
+
+      req.on("data", (chunk: string) => {
+        chunkBody += chunk
+      })
+
+      req.on("end", async () => {
+        const body: { syncKey: string } = JSON.parse(chunkBody)
+
+        const syncData: syncDevice = JSON.parse(store.get("sync"))
+
+        const isRegister: syncData[] = syncData.data.filter(item => item.syncKey === body.syncKey)
+
+        if (isRegister.length > 0 && isRegister[0].syncKey === body.syncKey) {
+          res.statusCode = 200
+        } else {
+          res.statusCode = 400
+        }
+
+        res.end()
+      })
+    } else if (req.url.includes("check")) {
+
+      if (req.socket.remoteAddress !== "127.0.0.1") {
+        res.statusCode = 400
+        return res.end()
+      }
+
+      let chunkBody = ""
+
+      req.on("data", (chunk: string) => {
+        chunkBody += chunk
+      })
+
+      req.on("end", async () => {
+        const body: { syncKey: string, url: string } = JSON.parse(chunkBody)
+
+        const syncData: syncDevice = JSON.parse(store.get("sync"))
+
+        const isRegister: syncData[] = syncData.data.filter(item => item.syncKey === body.syncKey)
+
+        if (isRegister.length > 0 && isRegister[0].syncKey === body.syncKey && master !== "") {
+
+          const data: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
+
+          const passwordSearch = data.password.filter(item => item.url.includes(body.url))
+
+          if (passwordSearch.length > 0 && passwordSearch[0].url.includes(body.url)) {
+            res.statusCode = 200
+            res.setHeader("Content-Type", "text/plain")
+            return res.end(JSON.stringify(<{ type: "find" | "new", link: string, email: string, password: string }>{ type: "find", email: passwordSearch[0].mail, link: passwordSearch[0].url, password: passwordSearch[0].password }))
+          } else {
+            res.statusCode = 400
+          }
+        } else {
+          res.statusCode = 400
+        }
+
+        res.end()
+      })
+    } else if (req.url.includes("addSyncDevice")) {
+
+      if (req.socket.remoteAddress !== "127.0.0.1") {
+        res.statusCode = 400
+        return res.end()
+      }
+
+      let chunkBody = ""
+
+      req.on("data", (chunk: string) => {
+        chunkBody += chunk
+      })
+
+      req.on("end", async () => {
+        const body: { syncKey: string } = JSON.parse(chunkBody)
+
+        const syncData: syncDevice = JSON.parse(store.get("sync"))
+
+        const isRegister: syncData[] = syncData.data.filter(item => item.syncKey === body.syncKey)
+
+        if (master !== "" && !(isRegister.length > 0)) {
+          ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: body.syncKey, lastSync: 0, name: "browser" }, ip: "0.0.0.0" })
+        }
+
+        res.statusCode = 200
+        res.end()
       })
     }
   })
