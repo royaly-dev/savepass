@@ -14,16 +14,14 @@ async function checkFrom() {
         if (input.type === "password") {
             hasPassAndEmail.password = true
             hasPassAndEmail.inputElementPassword = input
-            input.style.borderColor = "red"
-        } else if (input.type === "email" || input.type === "text" && (input.id === "user" || input.id === "username" || input.autocomplete === "username")) {
+        } else if (input.type === "email" || input.type === "text" && (input.id === "user" || input.name === "user" || input.id === "email" || input.name === "email" || input.autocomplete === "email" || input.id === "username" || input.autocomplete === "username")) {
             hasPassAndEmail.email = true
             hasPassAndEmail.inputElementEmail = input
-            input.style.borderColor = "red"
         }
     }
 
     if (hasPassAndEmail.email && hasPassAndEmail.password) {
-        const req = await chrome.runtime.sendMessage("background_checkpass_" + location.host)
+        const req = await chrome.runtime.sendMessage("background_checkpass_" + location.origin)
         if (req.split("_")[2] === "succes") {
             console.log("succes")
         }
@@ -41,7 +39,7 @@ chrome.runtime.onMessage.addListener(async (message: string, sender: chrome.runt
     if (arg[0] === "popup") {
         switch (arg[1]) {
             case "apply":
-                const data: { type: "find" | "new", link: string, email: string, password: string } = await chrome.runtime.sendMessage("background_getLast")
+                const data: { type: "find" | "new", link: string, email: string, password: string } = JSON.parse(await chrome.runtime.sendMessage("background_getLast_apply"))
                 applyFrom(data)
                 break;
 
@@ -56,9 +54,9 @@ async function applyFrom(data: { type: "find" | "new", link: string, email: stri
 
     for (const input of inputs) {
         if (input.type === "password") {
-            input.textContent = data.password
-        } else if (input.type === "email" || input.type === "text" && (input.id === "user" || input.id === "username" || input.autocomplete === "username")) {
-            input.textContent = data.email
+            input.value = data.password
+        } else if (input.type === "email" || input.type === "text" && (input.id === "user" || input.name === "user" || input.id === "email" || input.name === "email" || input.autocomplete === "email" || input.id === "username" || input.autocomplete === "username")) {
+            input.value = data.email
         }
     }
 }

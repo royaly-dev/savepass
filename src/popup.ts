@@ -6,15 +6,13 @@ window.addEventListener("load", async () => {
             chrome.tabs.query({ active: true, currentWindow: true }, (result: chrome.tabs.Tab[]) => {
                 chrome.tabs.sendMessage(result[0].id, "popup_apply")
             })
+            window.close()
         })
         document.querySelector<HTMLDivElement>("#loading").style.display = "none"
         document.querySelector<HTMLDivElement>("#showPass").style.display = "flex"
         document.querySelector<HTMLParagraphElement>("#email").textContent = data.email
         document.querySelector<HTMLParagraphElement>("#password").textContent = data.password
         document.querySelector<HTMLHeadingElement>("#link").textContent = data.link
-        if (data.type === "new") {
-            document.querySelector<HTMLButtonElement>("#button").textContent = "Register and Apply";
-        }
 
     } else {
         const isConnected = await chrome.runtime.sendMessage("background_status")

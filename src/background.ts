@@ -13,14 +13,16 @@ chrome.runtime.onMessage.addListener((message: string, sender: chrome.runtime.Me
             SyncService(sendResponse)
             break;
         case "checkpass":
-            checkService(sendResponse)
+            checkService(sendResponse, arg[2])
             break;
         case "getLast":
             sendResponse(JSON.stringify(latestData))
-            latestData.email = ""
-            latestData.password = ""
-            latestData.link = ""
-            latestData.type = "find"
+            if (arg[2] === "apply") {
+                latestData.email = ""
+                latestData.password = ""
+                latestData.link = ""
+                latestData.type = "find"
+            }
             break;
 
         default:
@@ -41,32 +43,32 @@ const StatusService = async (sendResponse: (responce: string) => void) => {
 }
 
 const SyncService = async (sendResponse: (responce: string) => void) => {
-    const syncKey = chrome.storage.local.get("sync")
+    const syncKey = await chrome.storage.local.get("sync")
 
     if (syncKey) {
-        const status = await fetch("http://localhost:5263/testSync", { method: 'POST', body: JSON.stringify({ syncKey: syncKey }) }).catch((err) => { console.log(err); return null })
-
+        const status = await fetch("http://localhost:5263/testSync", { method: 'POST', body: JSON.stringify({ syncKey: syncKey.sync }) }).catch((err) => { console.log(err); return null })
+        console.log(status.status)
         if (status?.status === 200) {
             sendResponse("valid")
         } else {
-            await addService()
             sendResponse("none")
+            await addService()
 
         }
     } else {
-        await addService()
         sendResponse("none")
+        await addService()
     }
 }
 
 const addService = async () => {
-    const newSyncKey = new Crypto().randomUUID()
+    const newSyncKey = crypto.randomUUID()
     await chrome.storage.local.set({ sync: newSyncKey })
     await fetch("http://localhost:5263/addSyncDevice", { method: 'POST', body: JSON.stringify({ syncKey: newSyncKey }) })
 }
 
-const checkService = async (sendResponse: (responce: string) => void) => {
-    const check = await fetch("http://localhost:5263/check", { method: 'POST', body: JSON.stringify({ syncKey: chrome.storage.local.get("sync") || "none" }) }).catch((err) => { console.log(err); return null })
+const checkService = async (sendResponse: (responce: string) => void, url: string) => {
+    const check = await fetch("http://localhost:5263/check", { method: 'POST', body: JSON.stringify({ syncKey: (await chrome.storage.local.get("sync")).sync, url: url }) }).catch((err) => { console.log(err); return null })
 
     if (check?.status === 200) {
         const checkJson = await check.json()
