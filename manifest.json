@@ -1,7 +1,12 @@
 {
     "manifest_version": 3,
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{94cb1ce1-a416-523b-b1a6-01506768b349}"
+        }
+    },
     "name": "SavePass",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "SavePass extention for web.",
     "icons": {
         "256": "icon-256.png"

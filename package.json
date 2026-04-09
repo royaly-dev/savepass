@@ -1,9 +1,10 @@
 {
   "name": "savepass",
-  "version": "1.0.0",
+  "version": "0.0.9",
   "description": "<h1 align=\"center\" id=\"title\">Save Pass - Extenton</h1>",
   "scripts": {
-    "build": "tsc --watch & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch"
+    "dev": "tsc --watch & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch",
+    "build": "tsc & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css"
   },
   "repository": {
     "type": "git",

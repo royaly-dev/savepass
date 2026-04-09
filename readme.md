@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Save Pass - Extenton</h1>
+<h1 align="center" id="title">Save Pass - Web Extenton</h1>
 
 <p id="description">A simple password manager that stores your passwords and TOTP codes in one place with the ability to sync all your data across devices including your phone.</p>
 
@@ -10,7 +10,7 @@
 
 <img src="img.png" />
 
-> **Note:** To view the mobile app go to the savepass_mobile branch or download it in the release
+> **Note:** To view the web extention go to the savepass-browser-extension branch, if you want to view the mobile app go to the savepass_mobile branch, but if you want to view the PC app go to the main branch
 
 <h2>🚀 Features</h2>
 
@@ -20,82 +20,31 @@ Here're some of the project's best features:
 *   Save your TOTP code (like an Authenticator app)
 *   Sync between devices (on the same network)
 *   Import / Export your data in a JSON file
+*   Access your saved password from your favorite web browser
 
-<h2>🛠️ Installation Steps ( for windows ):</h2>
+<h2>🛠️ Installation Steps :</h2>
 
-1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update
-
-2. Execute the installeur
-
-3. Let the onboarding process guide you
-
-4. enjoy the app !
-
-<h2>🛠️ Installation Steps ( for linux ):</h2>
-
-1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update
+1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update (extention.zip for Chromium-based browser and .xpi for Firefox)
 
 2. Install on your system :
 
-    - Debian Based :
+    - Firefox :
 
-        ```bash
-        dpkg -i savepass_linux_{arch}.deb
-        ```
+        1 - Download the extension and put it in the folder you want (don't extract it)
+        2 - now go to about:addons
+        3 - click on the "settings" icon and then click on "install module from file"
 
-    - flatpak :
+
+    - Chromium based :
     
-        ```bash
-        flatpak install savepass_linux_{arch}.flatpak
-        ```
-
-    - AppImage :
-
-        ```bash
-        chmod +x savepass_linux_{arch}.AppImage
-        ```
-
-        ```bash
-        ./savepass_linux_{arch}.AppImage
-        ```
+        1 - Download the extension and put it in the folder you want and extract the zip folder
+        2 - now go to browser-name://extensions
+        3 - enable the developer mode, then click on load unpacked extension and select the extracted folder
 
 3. Let the onboarding process guide you
 
-4. enjoy the app !
+4. enjoy the extension and don't forget to sync it with the app!
 
-
-<h2>🛠️ Build it from source :</h2>
-
-1. First clone this repositorie :
-
-    ```bash
-    git clone https://github.com/royaly-dev/savepass.git
-    ```
-
-2. Then install dependency :
-
-    ```bash
-    npm install
-    ```
-
-    ```bash
-    apt install flatpak flatpak-builder rpm
-    ```
-
-    ```bash
-    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    ```
-
-    > **Note:** The flatpak, flatpak-builder and rpm packages is need to be installed in order to build the app.
-    >
-    >Also **you need** to install on flatpack these components : 
-    flathub org.freedesktop.Sdk//24.08 - org.freedesktop.Platform//24.08 - org.electronjs.Electron2.BaseApp
-
-3. Now you can build from source !
-
-    ```bash
-    npm run make
-    ```
 
 <h2>✨ Credits</h2>
 This project was mostly written by me, but to fix some issues I had with the electron-forge builder I asked GitHub Copilot to help me figure out what was wrong.

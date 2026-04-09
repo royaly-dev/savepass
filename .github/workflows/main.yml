@@ -1,0 +1,40 @@
+name: Build Release
+on:
+    push:
+        branches: [savepass-browser-extension]
+
+permissions:
+    contents: write
+
+jobs:
+    build-app:
+        if: contains(github.event.head_commit.message, 'release')
+        runs-on: [ubuntu-latest]
+        steps:
+            - name: Check out
+              uses: actions/checkout@v1
+              with:
+                  ref: savepass-browser-extension
+
+            - name: Setup env
+              run: npm ci && npm run build && npm install web-ext
+
+            - name: Get version
+              run: echo "APP_VERSION=v$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+            - name: Build firefox
+              run: npx web-ext sign --api-key="${{secrets.APIKEY}}" --api-secret="${{secrets.APISECRET}}" --channel="unlisted"
+
+            - name: Make zip for Chromium
+              run: zip -r extention.zip assets/ icon-256.png manifest.json popup.html
+
+            - name: Upload
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ env.APP_VERSION }}
+                  files: |
+                      extention.zip
+                      web-ext-artifacts/*.xpi
+
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
