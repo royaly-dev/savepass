@@ -23,15 +23,15 @@
                 "<all_urls>"
             ],
             "js": [
-                "dist/content.js"
+                "assets/content.js"
             ]
         }
     ],
     "background": {
         "scripts": [
-            "dist/background.js"
+            "assets/background.js"
         ],
-        "service_worker": "dist/background.js"
+        "service_worker": "assets/background.js"
     },
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:5263 http://localhost:5263/*"
