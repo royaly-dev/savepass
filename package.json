@@ -4,7 +4,7 @@
   "description": "<h1 align=\"center\" id=\"title\">Save Pass - Extenton</h1>",
   "scripts": {
     "dev": "tsc --watch & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch",
-    "build": "tsc & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css"
+    "build": "tsc & tailwindcss -i ./src/input.css -o ./assets/output.css"
   },
   "repository": {
     "type": "git",
@@ -20,10 +20,10 @@
   "homepage": "https://github.com/royaly-dev/savepass#readme",
   "devDependencies": {
     "@types/chrome": "^0.1.38",
+    "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "@tailwindcss/cli": "^4.2.2",
-    "tailwindcss": "^4.2.2"
+    "@tailwindcss/cli": "^4.2.2"
   }
 }
