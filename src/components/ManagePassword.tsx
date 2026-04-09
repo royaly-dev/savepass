@@ -20,10 +20,10 @@ import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 import PasswordInput from "./passwordInput"
 
-export default function ManagePassword(props: { data: Data, updateData?: PasswordData, type: string, requestPassword: boolean, refresh(): void, openChange(): void }) {
+export default function ManagePassword(props: { data: Data, updateData?: PasswordData | null, type: string, requestPassword: boolean, refresh(): void, openChange(): void }) {
 
     const [password, setPassword] = useState<PasswordData>({ id: (crypto as any).randomUUID(), password: "", url: "", mail: "", deleted: false, lastedit: Date.now() })
-    const [tempNewMailValue, setTempNewMailValue] = useState<string>("")
+    const [tempNewMailValue, setTempNewMailValue] = useState<string | null>("")
     const tempNewMailRef = React.useRef<string>("")
     const selectedFromListRef = React.useRef(false)
     const [isReady, setIsReady] = useState(false)

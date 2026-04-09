@@ -37,7 +37,7 @@ function Homepage() {
   const [isAddingPassword, setIsAddingPassword] = useState<boolean>(false)
   const [isAddingTOTP, setIsAddingTOTP] = useState<boolean>(false)
   const [typeAddingPassword, setTypeAddingPassword] = useState<string>("add")
-  const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData>(null)
+  const [updatePasswordData, setUpdatePasswordData] = useState<PasswordData | null>(null)
   const [optCode, setOptCode] = useState<OptData[]>()
   const [optCodeLeft, setOptCodeLeft] = useState<number>(0)
   const [SelectValueSearch, setSelectValueSearch] = useState<string>("By WebSite")
@@ -45,23 +45,30 @@ function Homepage() {
   const [devicePairBox, setDevicePairBox] = useState<{ open: boolean, data: { newdevice: syncData, ip: string } }>({ open: false, data: { ip: "", newdevice: { lastSync: 0, name: "", syncKey: "" } } })
 
   useEffect(() => {
-    (window as any).savepass.onGetOTP((data: { left: number, data: OptData[] }) => {
+
+    const savepass = (window as any).savepass;
+
+    if (!savepass) {
+      return
+    }
+
+    savepass.onGetOTP((data: { left: number, data: OptData[] }) => {
       setOptCode(data.data)
       setOptCodeLeft(data.left)
       refresh()
       console.log("Ressus : " + data.data)
       console.log("left : " + data.left)
-    });
+    })
 
-    (window as any).savepass.syncError(() => {
+    savepass.syncError(() => {
       toast.error("Error while setup sync with the device")
-    });
+    })
 
-    (window as any).savepass.update(() => {
+    savepass.update(() => {
       toast.info("A new update is available !", { duration: 10000, action: <Button size='sm' variant='default' onClick={() => { (window as any).savepass.openLink("https://github.com/royaly-dev/savepass/releases/latest") }} >Download</Button>, icon: <Download size={16} /> })
-    });
+    })
 
-    (window as any).savepass.syncRefresh((type: number, name: string) => {
+    savepass.syncRefresh((type: number, name: string) => {
       switch (type) {
         case 1:
           toast.success(`Successfully synced with ${name} !`)
@@ -76,11 +83,11 @@ function Homepage() {
           break;
       }
       refreshOPT()
-    });
+    })
 
-    (window as any).savepass.ready_to_pair((data: { newdevice: syncData, ip: string }) => {
+    savepass.ready_to_pair((data: { newdevice: syncData, ip: string }) => {
       setDevicePairBox({ open: true, data: data })
-    });
+    })
   }, [])
 
   useEffect(() => {
@@ -130,19 +137,19 @@ function Homepage() {
   }
 
   const RequestPasswordDeletion = async (dataDeletion: PasswordData) => {
+    if (!data) return
     (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id === dataDeletion.id ? { ...item, deleted: true, lastedit: Date.now() } : item) })
     refresh()
   }
 
   const RequestTotpDeletion = async (dataDeletion: OptData) => {
-    console.log("data : " + JSON.stringify(data));
-    console.log(dataDeletion)
-    console.log({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: true } : item) });
+    if (!data) return
     (window as any).savepass.SaveData({ ...data, opt: data.opt.map(item => item.id === dataDeletion.id ? { ...item, deleted: true } : item) })
     refreshOPT()
   }
 
   const requestRecover = async (dataRecover: PasswordData) => {
+    if (!data) return
     (window as any).savepass.SaveData({ ...data, password: data.password.map(item => item.id === dataRecover.id ? { ...item, deleted: false } : item) });
     refresh()
   }
@@ -192,8 +199,8 @@ function Homepage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <ManagePassword updateData={updatePasswordData} openChange={() => { setIsAddingPassword(false); setTypeAddingPassword("add"); setUpdatePasswordData(null) }} type={typeAddingPassword} requestPassword={isAddingPassword} data={data} refresh={refresh} />
-      <ManageTotp data={data} openChange={() => { setIsAddingTOTP(false) }} refresh={refreshOPT} request={isAddingTOTP} />
+      <ManagePassword updateData={updatePasswordData} openChange={() => { setIsAddingPassword(false); setTypeAddingPassword("add"); setUpdatePasswordData(null) }} type={typeAddingPassword} requestPassword={isAddingPassword} data={data || { opt: [], password: [] }} refresh={refresh} />
+      <ManageTotp data={data || { opt: [], password: [] }} openChange={() => { setIsAddingTOTP(false) }} refresh={refreshOPT} request={isAddingTOTP} />
       <nav className='flex self-center col-span-1 w-full justify-center items-center flex-col my-2 bg-muted-foreground/15 h-fit rounded-md py-2 mx-2 box-content'>
         <KeyRound size={24} color={currentSection == "password" ? '#fff' : '#000'} onClick={() => { setCurrentSection("password") }} className={'p-1 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "password" ? 'bg-foreground' : '')} />
         <RectangleEllipsis color={currentSection == "opt" ? '#fff' : '#000'} size={24} onClick={() => { setCurrentSection("opt") }} className={'p-1 py-1.5 m-1.5 box-content transition-all duration-300 rounded-sm hover:bg-muted-foreground/35 cursor-pointer ' + (currentSection == "opt" ? 'bg-foreground' : '')} />
