@@ -33,10 +33,6 @@ app.on("second-instance", () => {
   }
 })
 
-type CustomService = Omit<Service, 'addresses'> & {
-  addresses: string[]
-}
-
 const key = new NodeRSA();
 key.setOptions({ encryptionScheme: 'pkcs1' })
 
@@ -51,7 +47,7 @@ let isQuitting = false
 let master = ""
 let syncKey = ""
 let isWaiting = false
-const Services: CustomService[] = []
+const Services: Service[] = []
 
 const checkUpdateForLinux = async () => {
   const fetchForVersion = await fetch("https://api.github.com/repos/royaly-dev/savepass/releases/latest").then(async responce => await responce.json())
@@ -71,15 +67,15 @@ if (process.platform != "linux") {
   })
 }
 
-const mainInstance = instance.find({ type: "http" }, (rawService: Service) => {
+const mainInstance = instance.find({ type: "http" }, (Service: Service) => {
   console.log("Detected a service")
-  const service = rawService as CustomService;
-  if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host && item.txt === service.txt).length === 0 && service.addresses.length > 0) {
-    if (Boolean(service.txt?.readytosync) && (Date.now() - service.txt?.time) < 10000) {
-      const synckey = service.name.split("_")
-      ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: service.host }, ip: service.addresses[0] })
+  if (!Service.referer?.address || Service.referer?.family !== "IPv4") return
+  if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === Service.referer?.address).length === 0 && Service.name.includes("savepass") && Services.filter(item => item.host === Service.host && item.txt === Service.txt).length === 0 && Service.addresses.length > 0) {
+    if (Boolean(Service.txt?.readytosync) && (Date.now() - Service.txt?.time) < 10000) {
+      const synckey = Service.name.split("_")
+      ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: Service.host }, ip: Service.referer?.address })
     }
-    Services.push(service as CustomService)
+    Services.push(Service)
   }
 })
 
@@ -225,14 +221,14 @@ const startSync = async () => {
   const SyncDeviceData: syncDevice = await JSON.parse(await store.get("sync"))
 
   for (const device of SyncDeviceData.data) {
-    for (const scanedDevice of DeviceScan.services as CustomService[]) {
+    for (const scanedDevice of DeviceScan.services) {
       if (scanedDevice.name.includes(device.syncKey)) {
-        if (!device?.public) return
+        if (!device?.public || !scanedDevice.referer?.address || scanedDevice.referer?.family !== "IPv4") return
         const tempKey = CryptoJS.lib.WordArray.random(16).toString()
         const tempKeyRSA = new NodeRSA({ b: 2048 });
         tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
         tempKeyRSA.importKey(device.public, 'pkcs1-public-pem')
-        const syncWithDevice = await fetch("http://" + scanedDevice.addresses[0] + ":5263/sync", {
+        const syncWithDevice = await fetch("http://" + scanedDevice.referer.address + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
             syncKey: syncKey,
@@ -490,8 +486,9 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
   const t = Services.filter(item => item.name.split("_")[item.name.split("_").length - 1] === data.syncKey)
-  if (t[0]?.addresses[0]) {
-    fetch("http://" + t[0]?.addresses[0] + ":5263/removeSync", {
+  if (!t[0].referer?.address || t[0].referer?.family !== "IPv4") return
+  if (t[0]?.referer.address) {
+    fetch("http://" + t[0]?.referer.address + ":5263/removeSync", {
       method: 'POST',
       body: JSON.stringify({
         syncKey: syncKey
