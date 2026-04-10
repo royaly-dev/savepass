@@ -1,4 +1,4 @@
-import { app, autoUpdater, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
@@ -7,13 +7,16 @@ import { Data, OptData, syncData, syncDevice } from './types/Data';
 import fs from 'fs'
 import { randomUUID } from 'crypto';
 import { Bonjour, Service } from 'bonjour-service'
-import { hostname } from 'os';
+import { hostname, networkInterfaces } from 'os';
 import { createServer, IncomingMessage, ServerResponse } from 'node:http'
-import { networkInterfaces } from 'node:os';
 import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
 import log from 'electron-log'
 import launching from 'electron-squirrel-startup'
 import NodeRSA from 'node-rsa'
+
+type CustomService = Omit<Service, 'addresses'> & {
+  addresses: string[]
+}
 
 const key = new NodeRSA({ b: 2048 });
 key.setOptions({ encryptionScheme: 'pkcs1' })
@@ -28,7 +31,7 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 let master = ""
 let syncKey = ""
 let isWaiting = false
-const Services: Service[] = []
+const Services: CustomService[] = []
 
 const checkUpdateForLinux = async () => {
   const fetchForVersion = await fetch("https://api.github.com/repos/royaly-dev/savepass/releases/latest").then(async responce => await responce.json())
@@ -48,14 +51,15 @@ if (process.platform != "linux") {
   })
 }
 
-const mainInstance = instance.find({ type: "http" }, (service: Service) => {
+const mainInstance = instance.find({ type: "http" }, (rawService: Service) => {
   console.log("Detected a service")
-  if (Object.values(networkInterfaces()).flat().filter((item) => item.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host && item.txt === service.txt).length === 0 && service.addresses.length > 0) {
+  const service = rawService as CustomService;
+  if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === service.addresses[0]).length === 0 && service.name.includes("savepass") && Services.filter(item => item.host === service.host && item.txt === service.txt).length === 0 && service.addresses.length > 0) {
     if (Boolean(service.txt?.readytosync) && (Date.now() - service.txt?.time) < 10000) {
       const synckey = service.name.split("_")
       ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: service.host }, ip: service.addresses[0] })
     }
-    Services.push(service)
+    Services.push(service as CustomService)
   }
 })
 
@@ -158,8 +162,9 @@ const startSync = async () => {
   const SyncDeviceData: syncDevice = await JSON.parse(await store.get("sync"))
 
   for (const device of SyncDeviceData.data) {
-    for (const scanedDevice of DeviceScan.services) {
+    for (const scanedDevice of DeviceScan.services as CustomService[]) {
       if (scanedDevice.name.includes(device.syncKey)) {
+        if (!device?.public) return
         const tempKey = CryptoJS.lib.WordArray.random(32).toString()
         const tempKeyRSA = new NodeRSA({ b: 2048 });
         tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
@@ -249,12 +254,27 @@ ipcMain.handle("GetData", () => {
   return JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
 })
 
+ipcMain.handle("GetUse", () => {
+  const use = store.get("use")
+  if (!use) {
+    store.set("use", "use")
+    return false
+  } else {
+    return true
+  }
+})
+
 ipcMain.on("openLink", (event, data) => {
   shell.openExternal(String(data))
 })
 
 ipcMain.on("copyToClipBoard", (event, data) => {
   clipboard.writeText(data)
+})
+
+ipcMain.on("Reset", (event, data) => {
+  store.delete("master")
+  store.delete("use")
 })
 
 ipcMain.on("SaveData", (event, data) => {
@@ -432,7 +452,7 @@ app.on('activate', () => {
 const webserver = async () => {
   // @ts-ignore
   const server = createServer((req, res) => {
-    if (req.url.includes("setupSync")) {
+    if (req.url?.includes("setupSync")) {
       let body = ""
 
       req.on("data", (chunk: string) => {
@@ -461,7 +481,7 @@ const webserver = async () => {
           res.end("")
         }
       })
-    } else if (req.url.includes("sync")) {
+    } else if (req.url?.includes("sync")) {
       let chunkBody = ""
 
       req.on("data", (chunk: string) => {
@@ -475,6 +495,7 @@ const webserver = async () => {
 
 
         if (isInSync.length > 0 && master != "") {
+          if (!isInSync[0]?.public) return
           const tempKeyRSA = new NodeRSA({ b: 2048 });
           tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
@@ -532,7 +553,7 @@ const webserver = async () => {
         }
 
       })
-    } else if (req.url.includes("removeSync")) {
+    } else if (req.url?.includes("removeSync")) {
       let chunkBody = ""
 
       req.on("data", (chunk: string) => {
@@ -554,12 +575,7 @@ const webserver = async () => {
         res.statusCode = 200
         res.end("")
       })
-    } else if (req.url.includes("status")) {
-
-      if (req.socket.remoteAddress !== "127.0.0.1") {
-        res.statusCode = 400
-        return res.end()
-      }
+    } else if (req.url?.includes("status")) {
 
       let chunkBody = ""
 
@@ -575,7 +591,8 @@ const webserver = async () => {
         }
         res.end()
       })
-    } else if (req.url.includes("testSync")) {
+
+    } else if (req.url?.includes("testSync")) {
 
       if (req.socket.remoteAddress !== "127.0.0.1") {
         res.statusCode = 400
@@ -603,7 +620,7 @@ const webserver = async () => {
 
         res.end()
       })
-    } else if (req.url.includes("check")) {
+    } else if (req.url?.includes("check")) {
 
       if (req.socket.remoteAddress !== "127.0.0.1") {
         res.statusCode = 400
@@ -642,7 +659,7 @@ const webserver = async () => {
 
         res.end()
       })
-    } else if (req.url.includes("addSyncDevice")) {
+    } else if (req.url?.includes("addSyncDevice")) {
 
       if (req.socket.remoteAddress !== "127.0.0.1") {
         res.statusCode = 400

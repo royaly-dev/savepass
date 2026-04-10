@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Eye, EyeOff } from 'lucide-react'
 import PasswordInput from './passwordInput'
+import ResetPasswordModal from './ResetPasswordModal'
 
 
 export default function MasterPasswordCheck(props: { confirmCheck(): void }) {
@@ -57,7 +58,8 @@ export default function MasterPasswordCheck(props: { confirmCheck(): void }) {
                             <PasswordInput form id='master' />
                         </div>
                     </div>
-                    <DialogFooter className='mt-3'>
+                    <DialogFooter className='mt-3 flex justify-between! items-center!'>
+                        <ResetPasswordModal />
                         <Button type='submit' variant="default">Unlock</Button>
                     </DialogFooter>
                 </form>

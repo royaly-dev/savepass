@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('savepass', {
   GetData: async () => {
     return await ipcRenderer.invoke("GetData")
   },
+  GetUse: async () => {
+    return await ipcRenderer.invoke("GetUse")
+  },
   SaveData: async (data: Data) => {
     ipcRenderer.send("SaveData", data)
   },
@@ -73,5 +76,8 @@ contextBridge.exposeInMainWorld('savepass', {
     ipcRenderer.on("ready_to_pair", (event, data: { newdevice: syncData, ip: string }) => {
       callback(data)
     })
+  },
+  Reset: async () => {
+    ipcRenderer.send("Reset", true)
   }
 })

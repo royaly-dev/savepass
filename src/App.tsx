@@ -27,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import FireWallChecker from './components/FireWallChecker';
 
 function Homepage() {
 
@@ -179,6 +180,7 @@ function Homepage() {
         <h1 className='text-black text-5xl font-[DM_Sans]'>Loading...</h1>
         <MasterPasswordCheck confirmCheck={() => { setConfirm(true) }} />
         <MasterPasswordSetup />
+        <FireWallChecker />
       </div>
     )
   }
