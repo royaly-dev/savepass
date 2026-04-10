@@ -13,6 +13,10 @@ import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
 import log from 'electron-log'
 import launching from 'electron-squirrel-startup'
 import NodeRSA from 'node-rsa'
+import path from 'path';
+
+// @ts-ignore
+import iconPng from './assets/icon.png';
 
 const getLock = app.requestSingleInstanceLock()
 
@@ -23,6 +27,7 @@ if (!getLock) {
 
 app.on("second-instance", () => {
   if (mainWindow) {
+    if (mainWindow.isDestroyed()) createWindow()
     if (mainWindow.isMaximized()) mainWindow.restore()
     mainWindow.show()
   }
@@ -85,7 +90,7 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     autoHideMenuBar: true,
-    icon: "assets/icon.ico",
+    icon: path.join(__dirname, iconPng),
     title: "SavePass",
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -173,7 +178,7 @@ app.on('ready', () => {
   createWindow()
   webserver()
 
-  const appIcon = new Tray("src/assets/icon.png")
+  const appIcon = new Tray(path.join(__dirname, iconPng))
 
   const contextMenu = Menu.buildFromTemplate([{
     label: "Start on startup", type: "checkbox", checked: app.getLoginItemSettings().openAtLogin, click: () => {
@@ -188,6 +193,7 @@ app.on('ready', () => {
   },
   {
     label: "Open", type: "normal", click: () => {
+      if (mainWindow.isDestroyed()) createWindow()
       mainWindow.show()
     }
   },
