@@ -18,7 +18,7 @@ type CustomService = Omit<Service, 'addresses'> & {
   addresses: string[]
 }
 
-const key = new NodeRSA({ b: 2048 });
+const key = new NodeRSA();
 key.setOptions({ encryptionScheme: 'pkcs1' })
 
 if (launching) app.quit()
@@ -145,6 +145,7 @@ app.on('ready', () => {
     })
   });
   createWindow()
+  webserver()
 });
 
 const startSync = async () => {
@@ -218,6 +219,9 @@ ipcMain.handle("Register", async (event, data) => {
   if (!store.get("master")) {
     await store.set("master", CryptoJS.AES.encrypt(data, data).toString())
     await store.set("data", CryptoJS.AES.encrypt(JSON.stringify({ password: [], opt: [] }), data).toString())
+
+    key.generateKeyPair(2048)
+
     await store.set("sync", JSON.stringify(<syncDevice>{ syncKey: randomUUID(), data: [], lastSync: 0, status: false, private: key.exportKey('pkcs1-private-pem'), public: key.exportKey('pkcs1-public-pem') }))
     return true
   } else {
@@ -692,4 +696,3 @@ const webserver = async () => {
     console.log(`Server started`);
   });
 }
-webserver()
