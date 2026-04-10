@@ -94,7 +94,7 @@ export default function Screen() {
       const ip = Array.from(services || new Set<Service>).filter(item => item.name.split("_")[item.name.split("_").length - 1] === device.syncKey)[0]?.addresses[0]
       if (ip) {
         try {
-          const tempKey = CryptoJS.lib.WordArray.random(32).toString()
+          const tempKey = CryptoJS.lib.WordArray.random(16).toString()
           const req = await fetch("http://" + ip + ":5263/sync", {
             method: 'POST',
             body: JSON.stringify({

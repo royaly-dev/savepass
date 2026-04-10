@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { Alert, AlertTitle } from './ui/alert';
 import { AlertCircleIcon } from 'lucide-react-native';
 import PasswordInput from './PasswordInput';
+import ResetPasswordModal from './ResetPasswordModal';
 
 export default function CheckPasswordCard({ PasswordChecked }: { PasswordChecked(): void }) {
 
@@ -46,6 +47,7 @@ export default function CheckPasswordCard({ PasswordChecked }: { PasswordChecked
                     <PasswordInput gen={false} id='master' onchange={setMasterPass} value={MastrePass} />
                 </View>
                 <Button className='w-full' variant="default" onPress={async () => { CheckPassword() }} ><Text>Unlock</Text></Button>
+                <ResetPasswordModal />
             </CardContent>
         </Card>
     )

@@ -7,6 +7,11 @@ import { RSA } from 'react-native-rsa-native';
 
 let KEY = ""
 
+export const resetStorage = async () => {
+    deleteMMKV("savepass")
+    return
+}
+
 export const isExist = () => {
     return existsMMKV("savepass")
 }

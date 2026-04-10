@@ -76,8 +76,8 @@ export default function SettingsArea({ scanedDevice, refresh, data }: { scanedDe
                             <AlertDialogCancel>
                                 <Text>Cancel</Text>
                             </AlertDialogCancel>
-                            <AlertDialogAction onPress={importData}>
-                                <Text>Continue</Text>
+                            <AlertDialogAction className="bg-destructive" onPress={importData}>
+                                <Text className="text-white">Continue</Text>
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -91,7 +91,7 @@ export default function SettingsArea({ scanedDevice, refresh, data }: { scanedDe
                 <Text className="dark:text-white">Last sycn : {new Date(Number(SyncData?.lastSync)).toLocaleDateString()}</Text>
                 <Text className="dark:text-white">connected device : {SyncData?.data.length}</Text>
             </View>
-            <SyncModal open={syncModalOpen} onchange={setSyncModalOpen} data={SyncData || { data: [], lastSync: 0, status: false, syncKey: "test" }} scanedDevice={scanedDevice} refreshData={getsync} />
+            <SyncModal open={syncModalOpen} onchange={setSyncModalOpen} data={SyncData || { data: [], lastSync: 0, status: false, syncKey: "test", private: "", public: "" }} scanedDevice={scanedDevice} refreshData={getsync} />
             <RecoverPassword onchange={setRecoverModalOpen} open={recoverModalOpen} refresh={refresh} data={data} />
         </View>
     )
