@@ -173,7 +173,7 @@ app.on('ready', () => {
   createWindow()
   webserver()
 
-  const appIcon = new Tray(nativeImage.createFromPath("assets/icon.png"))
+  const appIcon = new Tray("src/assets/icon.png")
 
   const contextMenu = Menu.buildFromTemplate([{
     label: "Start on startup", type: "checkbox", checked: app.getLoginItemSettings().openAtLogin, click: () => {
