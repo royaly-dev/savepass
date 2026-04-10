@@ -10,7 +10,7 @@
 
 <img src="img.png" />
 
-> **Note:** To view the mobile app go to the savepass_mobile branch or download it in the release
+> **Note:** To view the web extention go to the savepass-browser-extension branch, if you want to view the mobile app go to the savepass_mobile branch, but if you want to view the PC app go to the main branch
 
 <h2>🚀 Features</h2>
 
@@ -20,6 +20,7 @@ Here're some of the project's best features:
 *   Save your TOTP code (like an Authenticator app)
 *   Sync between devices (on the same network)
 *   Import / Export your data in a JSON file
+*   Access your saved password from your favorite web browser
 
 <h2>🛠️ Installation Steps ( for windows ):</h2>
 
