@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, session, shell } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, session, shell, Tray } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
@@ -28,6 +28,7 @@ const instance = new Bonjour({})
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+let isQuitting = false
 let master = ""
 let syncKey = ""
 let isWaiting = false
@@ -63,8 +64,10 @@ const mainInstance = instance.find({ type: "http" }, (rawService: Service) => {
   }
 })
 
+let mainWindow: BrowserWindow
+
 const createWindow = (): void => {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
     autoHideMenuBar: true,
@@ -77,6 +80,13 @@ const createWindow = (): void => {
 
   mainWindow.webContents.once("dom-ready", async () => {
     genTotptimeout(0)
+  })
+
+  mainWindow.on("close", (e) => {
+    if (!isQuitting) {
+      e.preventDefault()
+      mainWindow.hide()
+    }
   })
 
   ipcMain.on("ready_to_pair", (event, data: { newdevice: syncData, ip: string }) => {
@@ -127,6 +137,7 @@ async function genTotp() {
 }
 
 app.on('ready', () => {
+
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
@@ -144,8 +155,39 @@ app.on('ready', () => {
       }
     })
   });
+
   createWindow()
   webserver()
+
+  const appIcon = new Tray(nativeImage.createFromPath("assets/icon.png"))
+
+  const contextMenu = Menu.buildFromTemplate([{
+    label: "Start on startup", type: "checkbox", checked: app.getLoginItemSettings().openAtLogin, click: () => {
+      if (app.getLoginItemSettings().openAtLogin) {
+        store.set("startup", false)
+        app.setLoginItemSettings({ openAtLogin: false })
+      } else {
+        store.set("startup", true)
+        app.setLoginItemSettings({ openAtLogin: true })
+      }
+    },
+  },
+  {
+    label: "Open", type: "normal", click: () => {
+      mainWindow.show()
+    }
+  },
+  {
+    label: "quit", type: "normal", click: () => {
+      isQuitting = true
+      app.quit()
+    }
+  }])
+
+  appIcon.setToolTip("SavePass")
+  appIcon.setContextMenu(contextMenu)
+
+
 });
 
 const startSync = async () => {
@@ -196,12 +238,6 @@ const startSync = async () => {
 
   console.log("Finished to sync with all device !")
 }
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
 
 ipcMain.handle("IsRegister", async () => {
   if (!(await store.get("master"))) {
