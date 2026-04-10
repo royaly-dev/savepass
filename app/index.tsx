@@ -92,10 +92,12 @@ export default function Screen() {
     }
     for (const device of Devicesdata.data) {
       const ip = Array.from(services || new Set<Service>).filter(item => item.name.split("_")[item.name.split("_").length - 1] === device.syncKey)[0]?.addresses[0]
+      const ipRegex = /^((([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|(fe80:(?::[0-9a-fA-F]{1,4}){0,4}%[0-9a-zA-Z]{1,})|(::(?:ffff(?::0{1,4}){0,1}:){0,1}[0-9a-fA-F]{1,4})|([0-9a-fA-F]{1,4}:){1,4}:[0-9a-fA-F]{1,4}))$/
+      const ipVersion: "v4" | "v6" = ipRegex.test(ip) ? "v6" : "v4"
       if (ip) {
         try {
           const tempKey = CryptoJS.lib.WordArray.random(16).toString()
-          const req = await fetch("http://" + ip + ":5263/sync", {
+          const req = await fetch("http://" + (ipVersion === "v4" ? ip : `[${ip}]`) + ":5263/sync", {
             method: 'POST',
             body: JSON.stringify({
               data: CryptoJS.AES.encrypt(JSON.stringify(await GetStorageData()), tempKey).toString(),
