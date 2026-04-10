@@ -165,7 +165,7 @@ const startSync = async () => {
     for (const scanedDevice of DeviceScan.services as CustomService[]) {
       if (scanedDevice.name.includes(device.syncKey)) {
         if (!device?.public) return
-        const tempKey = CryptoJS.lib.WordArray.random(32).toString()
+        const tempKey = CryptoJS.lib.WordArray.random(16).toString()
         const tempKeyRSA = new NodeRSA({ b: 2048 });
         tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
         tempKeyRSA.importKey(device.public, 'pkcs1-public-pem')
@@ -543,7 +543,7 @@ const webserver = async () => {
           ipcMain.emit("syncFinished", null, { type: 1, name: syncDeviceData.data.filter((item) => item.syncKey === body.syncKey)[0].name })
           res.statusCode = 200
           res.setHeader("Content-Type", "text/plain")
-          const tempKey = CryptoJS.lib.WordArray.random(32).toString()
+          const tempKey = CryptoJS.lib.WordArray.random(16).toString()
           const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), tempKey).toString()
           tempKeyRSA.importKey(isInSync[0].public, 'pkcs1-public-pem')
           res.end(JSON.stringify({ data: encryptedData, confirm: true, key: tempKeyRSA.encrypt(tempKey, 'base64') }))
