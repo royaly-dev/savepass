@@ -14,6 +14,20 @@ import log from 'electron-log'
 import launching from 'electron-squirrel-startup'
 import NodeRSA from 'node-rsa'
 
+const getLock = app.requestSingleInstanceLock()
+
+if (!getLock) {
+  app.quit()
+  process.exit(0)
+}
+
+app.on("second-instance", () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) mainWindow.restore()
+    mainWindow.show()
+  }
+})
+
 type CustomService = Omit<Service, 'addresses'> & {
   addresses: string[]
 }
