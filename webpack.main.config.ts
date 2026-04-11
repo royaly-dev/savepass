@@ -4,7 +4,10 @@ import { mainRules as rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
 
 export const mainConfig: Configuration = {
-  entry: './src/index.ts',
+  entry: { index: './src/index.ts', SideWorker: './src/SideWorker.ts' },
+  output: {
+    filename: '[name].js'
+  },
   module: {
     rules,
   },

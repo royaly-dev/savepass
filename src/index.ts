@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, session, shell, Tray } from 'electron';
+import { app, BrowserWindow, clipboard, dialog, ipcMain, Menu, nativeImage, session, shell, Tray, utilityProcess } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import { generate } from 'otplib';
@@ -33,10 +33,10 @@ app.on("second-instance", () => {
   }
 })
 
+if (launching) app.quit();
+
 const key = new NodeRSA();
 key.setOptions({ encryptionScheme: 'pkcs1' })
-
-if (launching) app.quit()
 
 const store: any = new Store();
 const instance = new Bonjour({})
@@ -48,6 +48,66 @@ let master = ""
 let syncKey = ""
 let isWaiting = false
 const Services: Service[] = []
+
+let worker: Electron.UtilityProcess
+
+const RsaEncrypt = (RSA: string, key: string) => {
+  return new Promise((resolve) => {
+
+    const listener = (key: any) => {
+      worker.off("message", listener)
+      resolve(key)
+    }
+
+    worker.on("message", listener)
+
+    worker.postMessage({
+      type: "encrypt",
+      RSA: RSA,
+      key: key,
+      enc: ''
+    })
+  })
+}
+
+const RsaDecrypt = (RSA: string, key: string, enc: 'utf8' | 'base64') => {
+  return new Promise((resolve) => {
+
+    const listener = (key: any) => {
+      console.log("reseved")
+      worker.off("message", listener)
+      resolve(key)
+    }
+
+    worker.on("message", listener)
+
+    worker.postMessage({
+      type: "decrypt",
+      RSA: RSA,
+      key: key,
+      enc: enc
+    })
+  })
+}
+
+const RsaGen = (RSA: string, key: string): Promise<{ public: string, private: string }> => {
+  return new Promise((resolve) => {
+
+    const listener = (key: any) => {
+      worker.off("message", listener)
+      resolve(key)
+    }
+
+    worker.on("message", listener)
+
+    worker.postMessage({
+      type: "gen",
+      RSA: RSA,
+      key: key,
+      enc: ''
+    })
+  })
+}
 
 const checkUpdateForLinux = async () => {
   const fetchForVersion = await fetch("https://api.github.com/repos/royaly-dev/savepass/releases/latest").then(async responce => await responce.json())
@@ -68,9 +128,13 @@ if (process.platform != "linux") {
 }
 
 const mainInstance = instance.find({ type: "http" }, (Service: Service) => {
-  console.log("Detected a service")
+  console.log("Detected a service : " + Service.host)
   if (!Service.referer?.address || Service.referer?.family !== "IPv4") return
   if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === Service.referer?.address).length === 0 && Service.name.includes("savepass") && Services.filter(item => item.host === Service.host && item.txt === Service.txt).length === 0 && Service.addresses.length > 0) {
+    console.log("new service : " + Service.host)
+    instance.unpublishAll()
+    const host = hostname().slice(0, 17) + "_savepass_" + syncKey
+    instance.publish({ name: host, type: 'http', port: 3600 });
     if (Boolean(Service.txt?.readytosync) && (Date.now() - Service.txt?.time) < 10000) {
       const synckey = Service.name.split("_")
       ipcMain.emit("ready_to_pair", null, { newdevice: { syncKey: synckey[synckey.length - 1], lastSync: 0, name: Service.host }, ip: Service.referer?.address })
@@ -174,6 +238,8 @@ app.on('ready', () => {
   createWindow()
   webserver()
 
+  worker = utilityProcess.fork(path.join(__dirname, 'SideWorker.js'))
+
   const appIcon = new Tray(path.join(__dirname, iconPng))
 
   const contextMenu = Menu.buildFromTemplate([{
@@ -209,7 +275,8 @@ app.on('ready', () => {
 const startSync = async () => {
   console.log("Starting to sync with all device...")
   const DeviceScan = instance.find({ type: 'http' })
-  const host = await (hostname().slice(0, 17) + "_savepass_" + syncKey)
+  instance.unpublishAll()
+  const host = hostname().slice(0, 17) + "_savepass_" + syncKey
   instance.publish({ name: host, type: 'http', port: 3600 });
   await new Promise((resolve) => {
     setTimeout(() => {
@@ -225,20 +292,17 @@ const startSync = async () => {
       if (scanedDevice.name.includes(device.syncKey)) {
         if (!device?.public || !scanedDevice.referer?.address || scanedDevice.referer?.family !== "IPv4") return
         const tempKey = CryptoJS.lib.WordArray.random(16).toString()
-        const tempKeyRSA = new NodeRSA({ b: 2048 });
-        tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
-        tempKeyRSA.importKey(device.public, 'pkcs1-public-pem')
         const syncWithDevice = await fetch("http://" + scanedDevice.referer.address + ":5263/sync", {
           method: 'POST',
           body: JSON.stringify({
             syncKey: syncKey,
-            key: tempKeyRSA.encrypt(tempKey, 'base64'),
+            key: await RsaEncrypt(device.public, tempKey),
             data: CryptoJS.AES.encrypt(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8), tempKey).toString(),
             mobile: false
           })
         }).then(async responce => {
           const jsonBody = await responce.json()
-          return { ...jsonBody, data: JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), key.decrypt(jsonBody.key, 'utf8').toString()).toString(CryptoJS.enc.Utf8)) }
+          return { ...jsonBody, data: JSON.parse(CryptoJS.AES.decrypt((jsonBody.data), String(await RsaDecrypt(SyncDeviceData.private, jsonBody.key, 'utf8'))).toString(CryptoJS.enc.Utf8)) }
         })
 
         if (syncWithDevice?.confirm) {
@@ -272,9 +336,9 @@ ipcMain.handle("Register", async (event, data) => {
     await store.set("master", CryptoJS.AES.encrypt(data, data).toString())
     await store.set("data", CryptoJS.AES.encrypt(JSON.stringify({ password: [], opt: [] }), data).toString())
 
-    key.generateKeyPair(2048)
+    const { public: publicKey, private: privateKey } = await RsaGen("", "")
 
-    await store.set("sync", JSON.stringify(<syncDevice>{ syncKey: randomUUID(), data: [], lastSync: 0, status: false, private: key.exportKey('pkcs1-private-pem'), public: key.exportKey('pkcs1-public-pem') }))
+    await store.set("sync", JSON.stringify(<syncDevice>{ syncKey: randomUUID(), data: [], lastSync: 0, status: false, private: privateKey, public: publicKey }))
     return true
   } else {
     return false
@@ -446,7 +510,7 @@ ipcMain.handle("addSyncDevice", async (event, data: { newdevice: syncData, ip: s
       body: JSON.stringify({
         syncKey: syncKey,
         name: hostname(),
-        key: key.exportKey('pkcs1-public-pem')
+        key: SyncDevice.public
       })
     })
 
@@ -531,7 +595,7 @@ const webserver = async () => {
 
           isWaiting = false
           res.statusCode = 200
-          res.end(JSON.stringify({ key: key.exportKey('pkcs1-public-pem') }))
+          res.end(JSON.stringify({ key: SyncDevice.public }))
           startSync()
         } else {
           res.statusCode = 400
@@ -553,10 +617,8 @@ const webserver = async () => {
 
         if (isInSync.length > 0 && master != "") {
           if (!isInSync[0]?.public) return
-          const tempKeyRSA = new NodeRSA({ b: 2048 });
-          tempKeyRSA.setOptions({ encryptionScheme: 'pkcs1' })
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
-          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, key.decrypt(body.key, body.mobile ? 'base64' : 'utf8').toString()).toString(CryptoJS.enc.Utf8))
+          const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, String(await RsaDecrypt(syncDeviceData.private, body.key, body.mobile ? 'base64' : 'utf8'))).toString(CryptoJS.enc.Utf8))
           let insert = false
 
           for (const password of syncData.password) {
@@ -602,8 +664,7 @@ const webserver = async () => {
           res.setHeader("Content-Type", "text/plain")
           const tempKey = CryptoJS.lib.WordArray.random(16).toString()
           const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(tempSyncData), tempKey).toString()
-          tempKeyRSA.importKey(isInSync[0].public, 'pkcs1-public-pem')
-          res.end(JSON.stringify({ data: encryptedData, confirm: true, key: tempKeyRSA.encrypt(tempKey, 'base64') }))
+          res.end(JSON.stringify({ data: encryptedData, confirm: true, key: await RsaEncrypt(isInSync[0].public, tempKey) }))
         } else {
           res.statusCode = 400
           res.end(JSON.stringify({ confirm: false }))
