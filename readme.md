@@ -50,14 +50,10 @@ Here're some of the project's best features:
         flatpak install savepass_linux_{arch}.flatpak
         ```
 
-    - AppImage :
+    - RPM :
 
         ```bash
-        chmod +x savepass_linux_{arch}.AppImage
-        ```
-
-        ```bash
-        ./savepass_linux_{arch}.AppImage
+        rpm -ivh savepass_linux_{arch}.rpm
         ```
 
 3. Let the onboarding process guide you
