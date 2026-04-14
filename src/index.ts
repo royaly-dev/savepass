@@ -130,7 +130,7 @@ if (process.platform != "linux") {
 const mainInstance = instance.find({ type: "http" }, (Service: Service) => {
   console.log("Detected a service : " + Service.host)
   if (!Service.referer?.address || Service.referer?.family !== "IPv4") return
-  if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === Service.referer?.address).length === 0 && Service.name.includes("savepass") && Services.filter(item => item.host === Service.host && item.txt === Service.txt).length === 0 && Service.addresses.length > 0) {
+  if (Object.values(networkInterfaces()).flat().filter((item) => item?.address === Service.referer?.address).length === 0 && Service.name.includes("savepass") && Services.filter(item => item.host === Service.host && item.txt === Service.txt).length === 0 && Service?.addresses.length > 0) {
     console.log("new service : " + Service.host)
     instance.unpublishAll()
     const host = hostname().slice(0, 17) + "_savepass_" + syncKey

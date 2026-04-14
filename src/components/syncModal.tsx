@@ -1,8 +1,6 @@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
@@ -20,7 +18,12 @@ import { syncData, syncDevice } from "@/types/Data";
 import { useEffect, useState } from "react";
 import { Service } from "bonjour-service";
 import { Button } from "./ui/button";
-import { Check, MonitorSmartphone } from "lucide-react";
+import { Check, CircleAlert, MonitorSmartphone } from "lucide-react";
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
 
 export default function SyncModal({ ImportData, ExportData }: { ImportData(): void, ExportData(): void }) {
 
@@ -29,6 +32,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
     const [foundDevices, setFoundDevices] = useState<(Service)[]>(null);
     const [syncDeviceData, setSyncDeviceData] = useState<syncDevice>(null)
     const [carouselApiModal, setCarouselApiModal] = useState<CarouselApi>()
+    const [ErrMsg, setErrMsg] = useState<string>("")
 
     useEffect(() => {
         if (syncDeviceModal.open) {
@@ -44,6 +48,10 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
         })
 
         GetSyncStatus()
+
+        return () => {
+            setErrMsg("")
+        }
     }, [syncDeviceModal.open]);
 
     const GetSyncStatus = async () => {
@@ -59,9 +67,12 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
     }
 
     const addSyncDevice = async (data: { newdevice: syncData, ip: string }) => {
+        setErrMsg("")
         const addedDevice = await (window as any).savepass.addSyncDevice(data)
         if (addedDevice.confirm) {
             GetSyncStatus()
+        } else {
+            setErrMsg("The device is not reachable, check your firewall rules !")
         }
     }
 
@@ -88,7 +99,18 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
             <Dialog onOpenChange={() => { setSyncDeviceModal({ open: false, data: [], type: 0 }) }} open={syncDeviceModal.open}>
                 <DialogContent>
                     <DialogHeader>
-                        {syncDeviceData?.status ? "Manage Sync" : "Setup Sync"}
+                        <DialogTitle>{syncDeviceData?.status ? "Manage Sync" : "Setup Sync"}</DialogTitle>
+                        {
+                            ErrMsg && (
+                                <Alert>
+                                    <CircleAlert />
+                                    <AlertTitle>Warning</AlertTitle>
+                                    <AlertDescription>
+                                        {ErrMsg}
+                                    </AlertDescription>
+                                </Alert>
+                            )
+                        }
                     </DialogHeader>
                     <Carousel className="min-w-0" setApi={setCarouselApiModal} opts={{ watchDrag: false, startIndex: syncDeviceModal.type }}>
                         <CarouselContent>
@@ -143,7 +165,7 @@ export default function SyncModal({ ImportData, ExportData }: { ImportData(): vo
                                             : foundDevices.length === 0
                                                 ? <h3 className='text-xl text-muted-foreground'>No device found</h3>
                                                 : foundDevices.map((item) => {
-                                                    return item.name && <DeviceCard key={item.name.split("_")[item.name.split("_").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: item.addresses[0], newdevice: { syncKey: item.name.split("_")[item.name.split("_").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
+                                                    return item.name && <DeviceCard key={item.name.split("_")[item.name.split("_").length - 1]} name={item?.host} type='add' request={async () => { await addSyncDevice({ ip: String(item.referer?.address), newdevice: { syncKey: item.name.split("_")[item.name.split("_").length - 1], name: item.host, lastSync: Date.now() } }).then(() => { next() }) }} />
                                                 })
                                     }
                                 </div>

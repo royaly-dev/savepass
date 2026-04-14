@@ -16,7 +16,7 @@ import PasswordInput from './passwordInput'
 
 export default function MasterPasswordSetup() {
     const [isRegister, setIsRegister] = useState<boolean>(true);
-    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [ButtonText, setButtonText] = useState<string>("Create")
 
     useEffect(() => {
         const getregistred = async () => {
@@ -31,6 +31,7 @@ export default function MasterPasswordSetup() {
             <DialogContent className="sm:max-w-106.25">
                 <form onSubmit={async (e) => {
                     e.preventDefault();
+                    setButtonText("Creating...")
                     const formData = new FormData(e.currentTarget)
 
                     const master = String(formData.get("Master"))
@@ -41,11 +42,13 @@ export default function MasterPasswordSetup() {
 
                     if (master.toString().length < 8) {
                         toast.error("Your password must be at least 8 characters")
+                        setButtonText("Create")
                         return
                     }
 
                     if (master !== masterCheck) {
                         toast.error("Both passwords must be the same.")
+                        setButtonText("Create")
                         return
                     }
 
@@ -56,6 +59,7 @@ export default function MasterPasswordSetup() {
                         toast.success("Your password has been successfully saved !")
                         window.location.reload()
                     } else {
+                        setButtonText("Create")
                         toast.error("An error occurred")
                     }
 
@@ -83,7 +87,7 @@ export default function MasterPasswordSetup() {
                     </div>
 
                     <DialogFooter>
-                        <Button className='cursor-pointer mt-4' type="submit">Create</Button>
+                        <Button className='cursor-pointer mt-4' type="submit" disabled={ButtonText !== "Create"}>{ButtonText}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
