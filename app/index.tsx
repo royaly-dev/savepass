@@ -60,7 +60,7 @@ export default function Screen() {
         }
         return newSet
       })
-      if (!(Array.from(services || []).filter(item => item.name === service.name).length > 0) && Boolean(service.txt.readytosync) && Date.now() - service.txt.time < 2000 && isStorageChecked) {
+      if (!(Array.from(services || []).filter(item => item.name === service.name && item.txt === service.txt).length > 0) && Boolean(service.txt.readytosync) && Date.now() - service.txt.time < 2000 && isStorageChecked) {
         setDevicePairBox({ open: true, data: service })
       }
     }
