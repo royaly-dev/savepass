@@ -30,7 +30,7 @@ Here're some of the project's best features:
 
     - Firefox :
 
-        1 - Download the extension and put it in the folder you want (don't extract it)
+        1 - Download the extension (the .xpi file)
         2 - now go to about:addons
         3 - click on the "settings" icon and then click on "install module from file"
 
