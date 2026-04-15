@@ -27,7 +27,16 @@ export default function MasterPasswordCheck(props: { confirmCheck(): void }) {
             }
         }
         checkRegister()
+        checkstart()
     }, [])
+
+    const checkstart = async () => {
+        const check = await (window as any).savepass.Check("test");
+        console.log(check)
+        if (check) {
+            props.confirmCheck()
+        }
+    }
 
     return isRegister && (
         <Dialog open={isRegister} onOpenChange={() => { }}>

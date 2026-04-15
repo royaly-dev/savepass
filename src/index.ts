@@ -15,6 +15,8 @@ import launching from 'electron-squirrel-startup'
 import NodeRSA from 'node-rsa'
 import path from 'path';
 
+if (launching) app.quit();
+
 // @ts-ignore
 import iconPng from './assets/icon.png';
 
@@ -28,12 +30,8 @@ if (!getLock) {
 app.on("second-instance", () => {
   if (mainWindow) {
     if (mainWindow.isDestroyed()) createWindow()
-    if (mainWindow.isMaximized()) mainWindow.restore()
-    mainWindow.show()
   }
 })
-
-if (launching) app.quit();
 
 const key = new NodeRSA();
 key.setOptions({ encryptionScheme: 'pkcs1' })
@@ -164,7 +162,7 @@ const createWindow = (): void => {
   mainWindow.on("close", (e) => {
     if (!isQuitting) {
       e.preventDefault()
-      mainWindow.hide()
+      mainWindow.destroy()
     }
   })
 
@@ -245,10 +243,8 @@ app.on('ready', () => {
   const contextMenu = Menu.buildFromTemplate([{
     label: "Start on startup", type: "checkbox", checked: app.getLoginItemSettings().openAtLogin, click: () => {
       if (app.getLoginItemSettings().openAtLogin) {
-        store.set("startup", false)
         app.setLoginItemSettings({ openAtLogin: false })
       } else {
-        store.set("startup", true)
         app.setLoginItemSettings({ openAtLogin: true })
       }
     },
@@ -256,7 +252,6 @@ app.on('ready', () => {
   {
     label: "Open", type: "normal", click: () => {
       if (mainWindow.isDestroyed()) createWindow()
-      mainWindow.show()
     }
   },
   {
@@ -270,6 +265,10 @@ app.on('ready', () => {
   appIcon.setContextMenu(contextMenu)
 
 
+});
+
+app.on('window-all-closed', () => {
+  console.log("do nothing")
 });
 
 const startSync = async () => {
@@ -346,6 +345,11 @@ ipcMain.handle("Register", async (event, data) => {
 })
 
 ipcMain.handle("Check", (event, data) => {
+  if (master.length >= 8) {
+    console.log("test")
+    return true
+  }
+
   const EncryptedMaster = store.get("master")
   const DecryptedMaster = CryptoJS.AES.decrypt(EncryptedMaster, data).toString(CryptoJS.enc.Utf8)
 
