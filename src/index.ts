@@ -620,7 +620,11 @@ const webserver = async () => {
 
 
         if (isInSync.length > 0 && master != "") {
-          if (!isInSync[0]?.public) return
+          if (!isInSync[0]?.public) {
+            res.statusCode = 400
+            res.end(JSON.stringify({ confirm: false }))
+            return
+          }
           const tempSyncData: Data = JSON.parse(CryptoJS.AES.decrypt(store.get("data"), master).toString(CryptoJS.enc.Utf8))
           const syncData: Data = JSON.parse(CryptoJS.AES.decrypt(body.data, String(await RsaDecrypt(syncDeviceData.private, body.key, body.mobile ? 'base64' : 'utf8'))).toString(CryptoJS.enc.Utf8))
           let insert = false
