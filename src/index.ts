@@ -621,6 +621,7 @@ const webserver = async () => {
 
         if (isInSync.length > 0 && master != "") {
           if (!isInSync[0]?.public) {
+            console.log("invalid public key")
             res.statusCode = 400
             res.end(JSON.stringify({ confirm: false }))
             return
