@@ -554,9 +554,9 @@ ipcMain.handle("removeSyncDevice", async (event, data: syncData) => {
   SyncDevice.status = SyncDevice.data.length > 0
   await store.set("sync", JSON.stringify(SyncDevice))
   const t = Services.filter(item => item.name.split("_")[item.name.split("_").length - 1] === data.syncKey)
-  if (!t[0].referer?.address || t[0].referer?.family !== "IPv4") return
-  if (t[0]?.referer.address) {
-    fetch("http://" + t[0]?.referer.address + ":5263/removeSync", {
+  if (!t[0]?.referer?.address || t[0].referer?.family !== "IPv4") return
+  if (t[0]?.referer?.address) {
+    fetch("http://" + t[0]?.referer?.address + ":5263/removeSync", {
       method: 'POST',
       body: JSON.stringify({
         syncKey: syncKey
