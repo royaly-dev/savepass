@@ -24,7 +24,7 @@ Here're some of the project's best features:
 
 <h2>🖥️ Installation Steps :</h2>
 
-1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update
+1. Go to <a href="https://github.com/royaly-dev/savepass/releases/latest">GitHub Releases</a> and download the latest update (.apk)
 
 2. Execute the installer on your android device
 
@@ -52,7 +52,7 @@ Here're some of the project's best features:
     npm i
     ```
 
-    > **Note:** To run and test the app you need to have android studio with vertual device, an installation guide can be found [Here.](https://developer.android.com/studio/install?hl=fr)
+    > **Note:** To run and test the app you need to have android studio with vertual device, an installation guide can be found [Here.](https://developer.android.com/studio/install)
 
 3. Now you can build from source !
 
