@@ -1,6 +1,6 @@
 {
   "name": "savepass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "<h1 align=\"center\" id=\"title\">Save Pass - Extenton</h1>",
   "scripts": {
     "dev": "tsc --watch & npx @tailwindcss/cli -i ./src/input.css -o ./assets/output.css --watch",
