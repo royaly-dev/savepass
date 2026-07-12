@@ -235,7 +235,7 @@ function Homepage() {
                     ? data.password.map((item) => {
                       if (SearchValue === "") {
                         return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
-                      } else if (SearchValue !== "" && SelectValueSearch === "By WebSite" && new URL(item.url).hostname.includes(SearchValue)) {
+                      } else if (SearchValue !== "" && SelectValueSearch === "By WebSite" && item.url && new URL(item.url).hostname.includes(SearchValue)) {
                         return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
                       } else if (SearchValue !== "" && SelectValueSearch === "By Mail & User" && item.mail.includes(SearchValue)) {
                         return !item.deleted && <PasswordCard key={item.id} requestDelete={RequestPasswordDeletion} requestEdit={requestPasswordEdit} data={item} />
